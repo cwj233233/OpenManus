@@ -8,8 +8,6 @@ from app.logger import logger
 from app.prompt.browser import NEXT_STEP_PROMPT, SYSTEM_PROMPT
 from app.schema import Message, ToolChoice
 from app.tool import BrowserUseTool, Terminate, ToolCollection
-from app.tool.sandbox.sb_browser_tool import SandboxBrowserTool
-
 
 # Avoid circular import if BrowserAgent needs BrowserContextHelper
 if TYPE_CHECKING:
@@ -24,9 +22,18 @@ class BrowserContextHelper:
     async def get_browser_state(self) -> Optional[dict]:
         browser_tool = self.agent.available_tools.get_tool(BrowserUseTool().name)
         if not browser_tool:
-            browser_tool = self.agent.available_tools.get_tool(
-                SandboxBrowserTool().name
-            )
+            # SandboxBrowserTool depends on the optional 'daytona' package.
+            # Import it lazily so the project can run without daytona installed.
+            try:
+                from app.tool.sandbox.sb_browser_tool import SandboxBrowserTool  # noqa
+
+                browser_tool = self.agent.available_tools.get_tool(
+                    SandboxBrowserTool().name
+                )
+            except ModuleNotFoundError as e:
+                # If daytona (or other optional deps) are missing, just skip sandbox browser state.
+                logger.debug(f"Sandbox browser tool unavailable: {e}")
+                browser_tool = None
         if not browser_tool or not hasattr(browser_tool, "get_current_state"):
             logger.warning("BrowserUseTool not found or doesn't have get_current_state")
             return None

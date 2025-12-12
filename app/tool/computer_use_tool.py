@@ -11,7 +11,6 @@ from pydantic import Field
 from app.daytona.tool_base import Sandbox, SandboxToolsBase
 from app.tool.base import ToolResult
 
-
 KEYBOARD_KEYS = [
     "a",
     "b",
@@ -87,15 +86,15 @@ KEYBOARD_KEYS = [
 ]
 MOUSE_BUTTONS = ["left", "right", "middle"]
 _COMPUTER_USE_DESCRIPTION = """\
-A comprehensive computer automation tool that allows interaction with the desktop environment.
-* This tool provides commands for controlling mouse, keyboard, and taking screenshots
-* It maintains state including current mouse position
-* Use this when you need to automate desktop applications, fill forms, or perform GUI interactions
-Key capabilities include:
-* Mouse Control: Move, click, drag, scroll
-* Keyboard Input: Type text, press keys or key combinations
-* Screenshots: Capture and save screen images
-* Waiting: Pause execution for specified duration
+一个用于桌面环境的综合自动化工具。
+* 提供鼠标、键盘控制以及截图能力
+* 会维护状态（例如当前鼠标位置）
+* 当你需要自动化桌面应用、填写表单或进行 GUI 交互时使用
+主要能力包括：
+* 鼠标控制：移动、点击、拖拽、滚动
+* 键盘输入：输入文本、按键或组合键
+* 截图：捕获并保存屏幕图像
+* 等待：暂停指定时长
 """
 
 
@@ -122,42 +121,42 @@ class ComputerUseTool(SandboxToolsBase):
                     "hotkey",
                     "screenshot",
                 ],
-                "description": "The computer action to perform",
+                "description": "要执行的电脑/桌面自动化动作",
             },
-            "x": {"type": "number", "description": "X coordinate for mouse actions"},
-            "y": {"type": "number", "description": "Y coordinate for mouse actions"},
+            "x": {"type": "number", "description": "鼠标动作的 X 坐标"},
+            "y": {"type": "number", "description": "鼠标动作的 Y 坐标"},
             "button": {
                 "type": "string",
                 "enum": MOUSE_BUTTONS,
-                "description": "Mouse button for click/drag actions",
+                "description": "点击/拖拽动作使用的鼠标按键",
                 "default": "left",
             },
             "num_clicks": {
                 "type": "integer",
-                "description": "Number of clicks",
+                "description": "点击次数",
                 "enum": [1, 2, 3],
                 "default": 1,
             },
             "amount": {
                 "type": "integer",
-                "description": "Scroll amount (positive for up, negative for down)",
+                "description": "滚动量（正数向上、负数向下）",
                 "minimum": -10,
                 "maximum": 10,
             },
-            "text": {"type": "string", "description": "Text to type"},
+            "text": {"type": "string", "description": "要输入的文本"},
             "key": {
                 "type": "string",
                 "enum": KEYBOARD_KEYS,
-                "description": "Key to press",
+                "description": "要按下的单个按键",
             },
             "keys": {
                 "type": "string",
                 "enum": KEYBOARD_KEYS,
-                "description": "Key combination to press",
+                "description": "要按下的组合键",
             },
             "duration": {
                 "type": "number",
-                "description": "Duration in seconds to wait",
+                "description": "等待时长（秒）",
                 "default": 0.5,
             },
         },

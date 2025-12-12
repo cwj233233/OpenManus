@@ -5,13 +5,13 @@ class AskHuman(BaseTool):
     """Add a tool to ask human for help."""
 
     name: str = "ask_human"
-    description: str = "Use this tool to ask human for help."
+    description: str = "当你需要向用户（真人）提问以获得额外信息时使用此工具。"
     parameters: str = {
         "type": "object",
         "properties": {
             "inquire": {
                 "type": "string",
-                "description": "The question you want to ask human.",
+                "description": "你想向用户询问的问题。",
             }
         },
         "required": ["inquire"],

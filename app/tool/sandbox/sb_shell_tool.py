@@ -7,14 +7,13 @@ from app.daytona.tool_base import Sandbox, SandboxToolsBase
 from app.tool.base import ToolResult
 from app.utils.logger import logger
 
-
 Context = TypeVar("Context")
 _SHELL_DESCRIPTION = """\
-Execute a shell command in the workspace directory.
-IMPORTANT: Commands are non-blocking by default and run in a tmux session.
-This is ideal for long-running operations like starting servers or build processes.
-Uses sessions to maintain state between commands.
-This tool is essential for running CLI tools, installing packages, and managing system operations.
+在 workspace 目录中执行 shell 命令。
+重要：默认以非阻塞方式运行，并在 tmux 会话中执行。
+这非常适合启动服务、构建等长时间运行的操作。
+通过 session 保持多次命令之间的状态。
+该工具适用于运行 CLI 工具、安装依赖、进行系统级操作等。
 """
 
 
@@ -36,39 +35,33 @@ class SandboxShellTool(SandboxToolsBase):
                     "terminate_command",
                     "list_commands",
                 ],
-                "description": "The shell action to perform",
+                "description": "要执行的 shell 动作",
             },
             "command": {
                 "type": "string",
-                "description": "The shell command to execute. Use this for running CLI tools, installing packages, "
-                "or system operations. Commands can be chained using &&, ||, and | operators.",
+                "description": "要执行的 shell 命令。用于运行 CLI 工具、安装依赖或系统操作。可使用 &&、||、| 进行链式命令。",
             },
             "folder": {
                 "type": "string",
-                "description": "Optional relative path to a subdirectory of /workspace where the command should be "
-                "executed. Example: 'data/pdfs'",
+                "description": "（可选）/workspace 下的相对路径子目录，命令将在该目录中执行。例如：'data/pdfs'。",
             },
             "session_name": {
                 "type": "string",
-                "description": "Optional name of the tmux session to use. Use named sessions for related commands "
-                "that need to maintain state. Defaults to a random session name.",
+                "description": "（可选）tmux 会话名。对需要保持状态的相关命令建议使用固定 session；默认会随机生成。",
             },
             "blocking": {
                 "type": "boolean",
-                "description": "Whether to wait for the command to complete. Defaults to false for non-blocking "
-                "execution.",
+                "description": "是否阻塞等待命令完成。默认 false（非阻塞）。",
                 "default": False,
             },
             "timeout": {
                 "type": "integer",
-                "description": "Optional timeout in seconds for blocking commands. Defaults to 60. Ignored for "
-                "non-blocking commands.",
+                "description": "（可选）阻塞执行的超时时间（秒），默认 60；非阻塞时忽略。",
                 "default": 60,
             },
             "kill_session": {
                 "type": "boolean",
-                "description": "Whether to terminate the tmux session after checking. Set to true when you're done "
-                "with the command.",
+                "description": "在查看输出后是否终止 tmux 会话。命令执行完成且不再需要该会话时设为 true。",
                 "default": False,
             },
         },

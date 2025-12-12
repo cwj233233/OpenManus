@@ -15,22 +15,21 @@ from app.llm import LLM
 from app.tool.base import BaseTool, ToolResult
 from app.tool.web_search import WebSearch
 
-
 _BROWSER_DESCRIPTION = """\
-A powerful browser automation tool that allows interaction with web pages through various actions.
-* This tool provides commands for controlling a browser session, navigating web pages, and extracting information
-* It maintains state across calls, keeping the browser session alive until explicitly closed
-* Use this when you need to browse websites, fill forms, click buttons, extract content, or perform web searches
-* Each action requires specific parameters as defined in the tool's dependencies
+一个强大的浏览器自动化工具，支持通过多种动作与网页交互。
+* 提供控制浏览器会话、网页导航、信息提取等能力
+* 多次调用之间会保持状态，浏览器会话会持续存在，直到显式关闭
+* 当你需要浏览网页、填写表单、点击按钮、提取内容或进行网页搜索时使用
+* 每个动作需要的参数请参考 schema 的 dependencies 定义
 
-Key capabilities include:
-* Navigation: Go to specific URLs, go back, search the web, or refresh pages
-* Interaction: Click elements, input text, select from dropdowns, send keyboard commands
-* Scrolling: Scroll up/down by pixel amount or scroll to specific text
-* Content extraction: Extract and analyze content from web pages based on specific goals
-* Tab management: Switch between tabs, open new tabs, or close tabs
+核心能力包括：
+* 导航：打开指定 URL、返回上一页、网页搜索等
+* 交互：点击元素、输入文本、下拉框选择、发送键盘按键
+* 滚动：按像素滚动或滚动到指定文本
+* 内容提取：围绕给定目标从页面中提取/分析内容
+* 标签页管理：切换/新开/关闭标签页
 
-Note: When using element indices, refer to the numbered elements shown in the current browser state.
+注意：使用元素索引时，请参考当前浏览器状态中展示的带编号元素。
 """
 
 Context = TypeVar("Context")
@@ -62,43 +61,43 @@ class BrowserUseTool(BaseTool, Generic[Context]):
                     "open_tab",
                     "close_tab",
                 ],
-                "description": "The browser action to perform",
+                "description": "要执行的浏览器动作",
             },
             "url": {
                 "type": "string",
-                "description": "URL for 'go_to_url' or 'open_tab' actions",
+                "description": "'go_to_url' 或 'open_tab' 动作使用的 URL",
             },
             "index": {
                 "type": "integer",
-                "description": "Element index for 'click_element', 'input_text', 'get_dropdown_options', or 'select_dropdown_option' actions",
+                "description": "'click_element'/'input_text'/'get_dropdown_options'/'select_dropdown_option' 动作用的元素索引",
             },
             "text": {
                 "type": "string",
-                "description": "Text for 'input_text', 'scroll_to_text', or 'select_dropdown_option' actions",
+                "description": "'input_text'/'scroll_to_text'/'select_dropdown_option' 动作用的文本内容",
             },
             "scroll_amount": {
                 "type": "integer",
-                "description": "Pixels to scroll (positive for down, negative for up) for 'scroll_down' or 'scroll_up' actions",
+                "description": "'scroll_down'/'scroll_up' 动作的滚动像素（正数向下、负数向上）",
             },
             "tab_id": {
                 "type": "integer",
-                "description": "Tab ID for 'switch_tab' action",
+                "description": "'switch_tab' 动作使用的标签页 ID",
             },
             "query": {
                 "type": "string",
-                "description": "Search query for 'web_search' action",
+                "description": "'web_search' 动作使用的搜索关键词",
             },
             "goal": {
                 "type": "string",
-                "description": "Extraction goal for 'extract_content' action",
+                "description": "'extract_content' 动作的提取目标/要求",
             },
             "keys": {
                 "type": "string",
-                "description": "Keys to send for 'send_keys' action",
+                "description": "'send_keys' 动作要发送的按键",
             },
             "seconds": {
                 "type": "integer",
-                "description": "Seconds to wait for 'wait' action",
+                "description": "'wait' 动作等待的秒数",
             },
         },
         "required": ["action"],

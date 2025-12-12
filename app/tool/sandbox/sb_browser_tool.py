@@ -15,20 +15,19 @@ from app.daytona.tool_base import (  # Ensure Sandbox is imported correctly
 from app.tool.base import ToolResult
 from app.utils.logger import logger
 
-
 # Context = TypeVar("Context")
 _BROWSER_DESCRIPTION = """\
-A sandbox-based browser automation tool that allows interaction with web pages through various actions.
-* This tool provides commands for controlling a browser session in a sandboxed environment
-* It maintains state across calls, keeping the browser session alive until explicitly closed
-* Use this when you need to browse websites, fill forms, click buttons, or extract content in a secure sandbox
-* Each action requires specific parameters as defined in the tool's dependencies
-Key capabilities include:
-* Navigation: Go to specific URLs, go back in history
-* Interaction: Click elements by index, input text, send keyboard commands
-* Scrolling: Scroll up/down by pixel amount or scroll to specific text
-* Tab management: Switch between tabs or close tabs
-* Content extraction: Get dropdown options or select dropdown options
+一个基于沙箱的浏览器自动化工具，支持通过多种动作与网页交互。
+* 在沙箱环境中控制浏览器会话
+* 多次调用之间会保持状态，浏览器会话会持续存在，直到显式关闭
+* 当你需要在安全沙箱里浏览网页、填写表单、点击按钮或提取内容时使用
+* 每个 action 所需参数由 dependencies 定义
+主要能力包括：
+* 导航：打开指定 URL、返回历史
+* 交互：按索引点击元素、输入文本、发送键盘按键
+* 滚动：按像素滚动或滚动到指定文本
+* 标签页管理：切换/关闭标签页
+* 内容提取：获取/选择下拉框选项
 """
 
 
@@ -60,51 +59,51 @@ class SandboxBrowserTool(SandboxToolsBase):
                     "click_coordinates",
                     "drag_drop",
                 ],
-                "description": "The browser action to perform",
+                "description": "要执行的浏览器动作",
             },
             "url": {
                 "type": "string",
-                "description": "URL for 'navigate_to' action",
+                "description": "'navigate_to' 动作使用的 URL",
             },
             "index": {
                 "type": "integer",
-                "description": "Element index for interaction actions",
+                "description": "交互动作使用的元素索引",
             },
             "text": {
                 "type": "string",
-                "description": "Text for input or scroll actions",
+                "description": "输入或滚动动作使用的文本",
             },
             "amount": {
                 "type": "integer",
-                "description": "Pixel amount to scroll",
+                "description": "滚动像素数量",
             },
             "page_id": {
                 "type": "integer",
-                "description": "Tab ID for tab management actions",
+                "description": "标签页管理动作使用的 Tab ID",
             },
             "keys": {
                 "type": "string",
-                "description": "Keys to send for keyboard actions",
+                "description": "键盘动作要发送的按键",
             },
             "seconds": {
                 "type": "integer",
-                "description": "Seconds to wait",
+                "description": "等待秒数",
             },
             "x": {
                 "type": "integer",
-                "description": "X coordinate for click or drag actions",
+                "description": "点击/拖拽动作的 X 坐标",
             },
             "y": {
                 "type": "integer",
-                "description": "Y coordinate for click or drag actions",
+                "description": "点击/拖拽动作的 Y 坐标",
             },
             "element_source": {
                 "type": "string",
-                "description": "Source element for drag and drop",
+                "description": "拖拽动作的源元素",
             },
             "element_target": {
                 "type": "string",
-                "description": "Target element for drag and drop",
+                "description": "拖拽动作的目标元素",
             },
         },
         "required": ["action"],

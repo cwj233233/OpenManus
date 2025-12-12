@@ -5,11 +5,13 @@ from typing import Optional
 from app.exceptions import ToolError
 from app.tool.base import BaseTool, CLIResult
 
-
-_BASH_DESCRIPTION = """Execute a bash command in the terminal.
-* Long running commands: For commands that may run indefinitely, it should be run in the background and the output should be redirected to a file, e.g. command = `python3 app.py > server.log 2>&1 &`.
-* Interactive: If a bash command returns exit code `-1`, this means the process is not yet finished. The assistant must then send a second call to terminal with an empty `command` (which will retrieve any additional logs), or it can send additional text (set `command` to the text) to STDIN of the running process, or it can send command=`ctrl+c` to interrupt the process.
-* Timeout: If a command execution result says "Command timed out. Sending SIGINT to the process", the assistant should retry running the command in the background.
+_BASH_DESCRIPTION = """在终端中执行 bash 命令。
+* 长时间运行命令：对于可能一直运行的命令，应在后台运行并将输出重定向到文件，例如：`python3 app.py > server.log 2>&1 &`。
+* 交互式：如果 bash 命令返回退出码 `-1`，表示进程尚未结束。此时你必须再次调用本工具：
+  - 传入空的 `command`（用于获取新增日志），或
+  - 向运行中的进程 STDIN 发送输入（将 `command` 设置为要发送的文本），或
+  - 发送 `command="ctrl+c"` 中断进程。
+* 超时：如果执行结果提示 “Command timed out. Sending SIGINT to the process”，请改为后台方式重试该命令。
 """
 
 
@@ -123,7 +125,7 @@ class Bash(BaseTool):
         "properties": {
             "command": {
                 "type": "string",
-                "description": "The bash command to execute. Can be empty to view additional logs when previous exit code is `-1`. Can be `ctrl+c` to interrupt the currently running process.",
+                "description": "要执行的 bash 命令。若上一次退出码为 `-1`，可以传空字符串以查看新增日志；也可以传 `ctrl+c` 中断当前运行的进程。",
             },
         },
         "required": ["command"],

@@ -21,15 +21,15 @@ class Crawl4aiTool(BaseTool):
     """
 
     name: str = "crawl4ai"
-    description: str = """Web crawler that extracts clean, AI-ready content from web pages.
+    description: str = """从网页中抓取并提取干净、适合 AI 使用的内容的爬虫工具。
 
-    Features:
-    - Extracts clean markdown content optimized for LLMs
-    - Handles JavaScript-heavy sites and dynamic content
-    - Supports multiple URLs in a single request
-    - Fast and reliable with built-in error handling
+    特性：
+    - 提取面向 LLM 优化的干净 Markdown 内容
+    - 支持 JavaScript 较重的网站与动态内容
+    - 支持一次请求抓取多个 URL
+    - 内置错误处理，速度快且稳定
 
-    Perfect for content analysis, research, and feeding web content to AI models."""
+    适用于内容分析、资料调研，以及将网页内容喂给 AI 模型。"""
 
     parameters: dict = {
         "type": "object",
@@ -37,24 +37,24 @@ class Crawl4aiTool(BaseTool):
             "urls": {
                 "type": "array",
                 "items": {"type": "string"},
-                "description": "(required) List of URLs to crawl. Can be a single URL or multiple URLs.",
+                "description": "（必填）要抓取的 URL 列表（可单个或多个）。",
                 "minItems": 1,
             },
             "timeout": {
                 "type": "integer",
-                "description": "(optional) Timeout in seconds for each URL. Default is 30.",
+                "description": "（可选）每个 URL 的超时时间（秒），默认 30。",
                 "default": 30,
                 "minimum": 5,
                 "maximum": 120,
             },
             "bypass_cache": {
                 "type": "boolean",
-                "description": "(optional) Whether to bypass cache and fetch fresh content. Default is false.",
+                "description": "（可选）是否绕过缓存抓取最新内容，默认 false。",
                 "default": False,
             },
             "word_count_threshold": {
                 "type": "integer",
-                "description": "(optional) Minimum word count for content blocks. Default is 10.",
+                "description": "（可选）内容块最小词数阈值，默认 10。",
                 "default": 10,
                 "minimum": 1,
             },
@@ -168,12 +168,16 @@ class Crawl4aiTool(BaseTool):
                                     "url": url,
                                     "success": True,
                                     "status_code": getattr(result, "status_code", 200),
-                                    "title": result.metadata.get("title")
-                                    if result.metadata
-                                    else None,
-                                    "markdown": result.markdown
-                                    if hasattr(result, "markdown")
-                                    else None,
+                                    "title": (
+                                        result.metadata.get("title")
+                                        if result.metadata
+                                        else None
+                                    ),
+                                    "markdown": (
+                                        result.markdown
+                                        if hasattr(result, "markdown")
+                                        else None
+                                    ),
                                     "word_count": word_count,
                                     "links_count": links_count,
                                     "images_count": images_count,

@@ -21,7 +21,7 @@ class MCPClientTool(BaseTool):
     async def execute(self, **kwargs) -> ToolResult:
         """Execute the tool by making a remote call to the MCP server."""
         if not self.session:
-            return ToolResult(error="Not connected to MCP server")
+            return ToolResult(error="尚未连接到 MCP 服务器")
 
         try:
             logger.info(f"Executing tool: {self.original_name}")
@@ -29,9 +29,9 @@ class MCPClientTool(BaseTool):
             content_str = ", ".join(
                 item.text for item in result.content if isinstance(item, TextContent)
             )
-            return ToolResult(output=content_str or "No output returned.")
+            return ToolResult(output=content_str or "工具未返回任何输出。")
         except Exception as e:
-            return ToolResult(error=f"Error executing tool: {str(e)}")
+            return ToolResult(error=f"执行工具时发生错误：{str(e)}")
 
 
 class MCPClients(ToolCollection):
@@ -41,7 +41,7 @@ class MCPClients(ToolCollection):
 
     sessions: Dict[str, ClientSession] = {}
     exit_stacks: Dict[str, AsyncExitStack] = {}
-    description: str = "MCP client tools for server interaction"
+    description: str = "用于与 MCP 服务器交互的一组客户端工具"
 
     def __init__(self):
         super().__init__()  # Initialize with empty tools list
@@ -50,7 +50,7 @@ class MCPClients(ToolCollection):
     async def connect_sse(self, server_url: str, server_id: str = "") -> None:
         """Connect to an MCP server using SSE transport."""
         if not server_url:
-            raise ValueError("Server URL is required.")
+            raise ValueError("必须提供服务器 URL。")
 
         server_id = server_id or server_url
 
@@ -73,7 +73,7 @@ class MCPClients(ToolCollection):
     ) -> None:
         """Connect to an MCP server using stdio transport."""
         if not command:
-            raise ValueError("Server command is required.")
+            raise ValueError("必须提供服务器启动命令。")
 
         server_id = server_id or command
 
@@ -98,7 +98,7 @@ class MCPClients(ToolCollection):
         """Initialize session and populate tool map."""
         session = self.sessions.get(server_id)
         if not session:
-            raise RuntimeError(f"Session not initialized for server {server_id}")
+            raise RuntimeError(f"服务器 {server_id} 的会话尚未初始化")
 
         await session.initialize()
         response = await session.list_tools()

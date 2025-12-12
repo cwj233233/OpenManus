@@ -24,15 +24,13 @@ class SearchResult(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    position: int = Field(description="Position in search results")
-    url: str = Field(description="URL of the search result")
-    title: str = Field(default="", description="Title of the search result")
-    description: str = Field(
-        default="", description="Description or snippet of the search result"
-    )
-    source: str = Field(description="The search engine that provided this result")
+    position: int = Field(description="搜索结果中的序号位置")
+    url: str = Field(description="搜索结果的 URL")
+    title: str = Field(default="", description="搜索结果标题")
+    description: str = Field(default="", description="搜索结果的摘要/片段说明")
+    source: str = Field(description="提供该结果的搜索引擎")
     raw_content: Optional[str] = Field(
-        default=None, description="Raw content from the search result page if available"
+        default=None, description="（可选）结果页面抓取到的原始文本内容"
     )
 
     def __str__(self) -> str:
@@ -45,21 +43,19 @@ class SearchMetadata(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    total_results: int = Field(description="Total number of results found")
-    language: str = Field(description="Language code used for the search")
-    country: str = Field(description="Country code used for the search")
+    total_results: int = Field(description="返回结果数量")
+    language: str = Field(description="搜索使用的语言代码")
+    country: str = Field(description="搜索使用的国家/地区代码")
 
 
 class SearchResponse(ToolResult):
     """Structured response from the web search tool, inheriting ToolResult."""
 
-    query: str = Field(description="The search query that was executed")
+    query: str = Field(description="本次执行的搜索关键词")
     results: List[SearchResult] = Field(
-        default_factory=list, description="List of search results"
+        default_factory=list, description="搜索结果列表"
     )
-    metadata: Optional[SearchMetadata] = Field(
-        default=None, description="Metadata about the search"
-    )
+    metadata: Optional[SearchMetadata] = Field(default=None, description="搜索元数据")
 
     @model_validator(mode="after")
     def populate_output(self) -> "SearchResponse":
@@ -157,34 +153,34 @@ class WebSearch(BaseTool):
     """Search the web for information using various search engines."""
 
     name: str = "web_search"
-    description: str = """Search the web for real-time information about any topic.
-    This tool returns comprehensive search results with relevant information, URLs, titles, and descriptions.
-    If the primary search engine fails, it automatically falls back to alternative engines."""
+    description: str = """在互联网上搜索实时信息。
+    该工具会返回包含 URL、标题、摘要等信息的搜索结果。
+    如果首选搜索引擎失败，会自动回退到备用引擎。"""
     parameters: dict = {
         "type": "object",
         "properties": {
             "query": {
                 "type": "string",
-                "description": "(required) The search query to submit to the search engine.",
+                "description": "（必填）要提交给搜索引擎的查询关键词。",
             },
             "num_results": {
                 "type": "integer",
-                "description": "(optional) The number of search results to return. Default is 5.",
+                "description": "（可选）返回结果数量，默认 5。",
                 "default": 5,
             },
             "lang": {
                 "type": "string",
-                "description": "(optional) Language code for search results (default: en).",
+                "description": "（可选）搜索结果语言代码（默认：en）。",
                 "default": "en",
             },
             "country": {
                 "type": "string",
-                "description": "(optional) Country code for search results (default: us).",
+                "description": "（可选）搜索结果国家/地区代码（默认：us）。",
                 "default": "us",
             },
             "fetch_content": {
                 "type": "boolean",
-                "description": "(optional) Whether to fetch full content from result pages. Default is false.",
+                "description": "（可选）是否抓取结果页面正文内容，默认 false。",
                 "default": False,
             },
         },

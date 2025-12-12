@@ -4,10 +4,9 @@ from typing import Dict, List, Literal, Optional
 from app.exceptions import ToolError
 from app.tool.base import BaseTool, ToolResult
 
-
 _PLANNING_TOOL_DESCRIPTION = """
-A planning tool that allows the agent to create and manage plans for solving complex tasks.
-The tool provides functionality for creating plans, updating plan steps, and tracking progress.
+一个用于创建与管理计划的工具，帮助智能体解决复杂任务。
+支持创建计划、更新计划步骤、跟踪任务进度等能力。
 """
 
 
@@ -23,7 +22,7 @@ class PlanningTool(BaseTool):
         "type": "object",
         "properties": {
             "command": {
-                "description": "The command to execute. Available commands: create, update, list, get, set_active, mark_step, delete.",
+                "description": "要执行的命令。可选值：create、update、list、get、set_active、mark_step、delete。",
                 "enum": [
                     "create",
                     "update",
@@ -36,29 +35,29 @@ class PlanningTool(BaseTool):
                 "type": "string",
             },
             "plan_id": {
-                "description": "Unique identifier for the plan. Required for create, update, set_active, and delete commands. Optional for get and mark_step (uses active plan if not specified).",
+                "description": "计划的唯一标识。create/update/set_active/delete 需要；get/mark_step 可选（不传则使用当前 active plan）。",
                 "type": "string",
             },
             "title": {
-                "description": "Title for the plan. Required for create command, optional for update command.",
+                "description": "计划标题。create 必填；update 可选。",
                 "type": "string",
             },
             "steps": {
-                "description": "List of plan steps. Required for create command, optional for update command.",
+                "description": "计划步骤列表。create 必填；update 可选。",
                 "type": "array",
                 "items": {"type": "string"},
             },
             "step_index": {
-                "description": "Index of the step to update (0-based). Required for mark_step command.",
+                "description": "要更新的步骤索引（从 0 开始）。mark_step 必填。",
                 "type": "integer",
             },
             "step_status": {
-                "description": "Status to set for a step. Used with mark_step command.",
+                "description": "步骤状态（用于 mark_step）。",
                 "enum": ["not_started", "in_progress", "completed", "blocked"],
                 "type": "string",
             },
             "step_notes": {
-                "description": "Additional notes for a step. Optional for mark_step command.",
+                "description": "步骤备注（mark_step 可选）。",
                 "type": "string",
             },
         },

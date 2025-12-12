@@ -197,6 +197,12 @@ cython_debug/
 
 # OSX
 .DS_Store
+.env
+.env.*
+
+# Local config containing secrets (do not commit)
+config/config.toml
+config/mcp.json
 
 # node
 node_modules

@@ -8,20 +8,19 @@ from app.tool.base import ToolResult
 from app.utils.files_utils import clean_path, should_exclude_file
 from app.utils.logger import logger
 
-
 Context = TypeVar("Context")
 
 _FILES_DESCRIPTION = """\
-A sandbox-based file system tool that allows file operations in a secure sandboxed environment.
-* This tool provides commands for creating, reading, updating, and deleting files in the workspace
-* All operations are performed relative to the /workspace directory for security
-* Use this when you need to manage files, edit code, or manipulate file contents in a sandbox
-* Each action requires specific parameters as defined in the tool's dependencies
-Key capabilities include:
-* File creation: Create new files with specified content and permissions
-* File modification: Replace specific strings or completely rewrite files
-* File deletion: Remove files from the workspace
-* File reading: Read file contents with optional line range specification
+一个基于沙箱的文件系统工具，用于在安全隔离环境中对 workspace 进行文件操作。
+* 支持在 workspace 中创建/读取/更新/删除文件
+* 出于安全考虑，所有操作均相对于 /workspace 目录执行
+* 当你需要在沙箱中管理文件、编辑代码或修改文件内容时使用
+* 每个 action 所需参数由 dependencies 定义
+主要能力包括：
+* 创建文件：按指定内容与权限创建新文件
+* 修改文件：字符串替换或整文件重写
+* 删除文件：从 workspace 删除文件
+* 读取文件：支持按行范围读取文件内容
 """
 
 
@@ -39,27 +38,27 @@ class SandboxFilesTool(SandboxToolsBase):
                     "full_file_rewrite",
                     "delete_file",
                 ],
-                "description": "The file operation to perform",
+                "description": "要执行的文件操作",
             },
             "file_path": {
                 "type": "string",
-                "description": "Path to the file, relative to /workspace (e.g., 'src/main.py')",
+                "description": "文件路径，相对于 /workspace（例如：'src/main.py'）",
             },
             "file_contents": {
                 "type": "string",
-                "description": "Content to write to the file",
+                "description": "要写入文件的内容",
             },
             "old_str": {
                 "type": "string",
-                "description": "Text to be replaced (must appear exactly once)",
+                "description": "要被替换的文本（必须且只能出现一次）",
             },
             "new_str": {
                 "type": "string",
-                "description": "Replacement text",
+                "description": "替换后的文本",
             },
             "permissions": {
                 "type": "string",
-                "description": "File permissions in octal format (e.g., '644')",
+                "description": "文件权限（八进制字符串，例如 '644'）",
                 "default": "644",
             },
         },

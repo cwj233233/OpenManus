@@ -15,7 +15,6 @@ from app.tool.file_operators import (
     SandboxFileOperator,
 )
 
-
 Command = Literal[
     "view",
     "create",
@@ -35,16 +34,16 @@ TRUNCATED_MESSAGE: str = (
 
 # Tool description
 _STR_REPLACE_EDITOR_DESCRIPTION = """Custom editing tool for viewing, creating and editing files
-* State is persistent across command calls and discussions with the user
-* If `path` is a file, `view` displays the result of applying `cat -n`. If `path` is a directory, `view` lists non-hidden files and directories up to 2 levels deep
-* The `create` command cannot be used if the specified `path` already exists as a file
-* If a `command` generates a long output, it will be truncated and marked with `<response clipped>`
-* The `undo_edit` command will revert the last edit made to the file at `path`
+* 状态会在多次工具调用以及与用户的对话过程中保持（具备持久性）
+* 如果 `path` 是文件，`view` 会展示 `cat -n` 的结果；如果 `path` 是目录，`view` 会列出最多 2 层的非隐藏文件/目录
+* 当指定 `path` 已存在为文件时，不能使用 `create` 命令
+* 若某个 `command` 产生很长输出，会被截断并标记为 `<response clipped>`
+* `undo_edit` 会撤销对 `path` 指向文件的上一次编辑
 
 Notes for using the `str_replace` command:
-* The `old_str` parameter should match EXACTLY one or more consecutive lines from the original file. Be mindful of whitespaces!
-* If the `old_str` parameter is not unique in the file, the replacement will not be performed. Make sure to include enough context in `old_str` to make it unique
-* The `new_str` parameter should contain the edited lines that should replace the `old_str`
+* `old_str` 必须与原文件中一段**连续的一行或多行**完全一致（包括空格/缩进！）
+* 如果 `old_str` 在文件中不唯一，将不会执行替换；请在 `old_str` 中包含足够上下文以确保唯一
+* `new_str` 应包含用于替换 `old_str` 的新内容
 """
 
 
@@ -66,32 +65,32 @@ class StrReplaceEditor(BaseTool):
         "type": "object",
         "properties": {
             "command": {
-                "description": "The commands to run. Allowed options are: `view`, `create`, `str_replace`, `insert`, `undo_edit`.",
+                "description": "要执行的命令。可选值：`view`、`create`、`str_replace`、`insert`、`undo_edit`。",
                 "enum": ["view", "create", "str_replace", "insert", "undo_edit"],
                 "type": "string",
             },
             "path": {
-                "description": "Absolute path to file or directory.",
+                "description": "文件或目录的绝对路径。",
                 "type": "string",
             },
             "file_text": {
-                "description": "Required parameter of `create` command, with the content of the file to be created.",
+                "description": "`create` 命令必填：要写入新文件的内容。",
                 "type": "string",
             },
             "old_str": {
-                "description": "Required parameter of `str_replace` command containing the string in `path` to replace.",
+                "description": "`str_replace` 命令必填：需要在 `path` 文件中被替换的原始文本片段。",
                 "type": "string",
             },
             "new_str": {
-                "description": "Optional parameter of `str_replace` command containing the new string (if not given, no string will be added). Required parameter of `insert` command containing the string to insert.",
+                "description": "`str_replace` 可选：用于替换的新文本（不传则不添加任何内容）。`insert` 命令必填：要插入的文本。",
                 "type": "string",
             },
             "insert_line": {
-                "description": "Required parameter of `insert` command. The `new_str` will be inserted AFTER the line `insert_line` of `path`.",
+                "description": "`insert` 命令必填：`new_str` 将被插入到 `path` 的第 `insert_line` 行之后（行号从 1 开始）。",
                 "type": "integer",
             },
             "view_range": {
-                "description": "Optional parameter of `view` command when `path` points to a file. If none is given, the full file is shown. If provided, the file will be shown in the indicated line number range, e.g. [11, 12] will show lines 11 and 12. Indexing at 1 to start. Setting `[start_line, -1]` shows all lines from `start_line` to the end of the file.",
+                "description": "`view` 命令可选（当 `path` 为文件时）：不传则显示全文件；传入如 [11, 12] 表示显示第 11~12 行（行号从 1 开始）；传入 `[start_line, -1]` 表示从 start_line 显示到文件末尾。",
                 "items": {"type": "integer"},
                 "type": "array",
             },

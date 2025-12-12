@@ -7,9 +7,7 @@ from app.tool import BaseTool
 
 class CreateChatCompletion(BaseTool):
     name: str = "create_chat_completion"
-    description: str = (
-        "Creates a structured completion with specified output formatting."
-    )
+    description: str = "生成一个带指定输出格式（结构化）的回复。"
 
     # Type mapping for JSON schema
     type_mapping: dict = {
@@ -37,7 +35,7 @@ class CreateChatCompletion(BaseTool):
                 "properties": {
                     "response": {
                         "type": "string",
-                        "description": "The response text that should be delivered to the user.",
+                        "description": "要返回给用户的回复文本。",
                     },
                 },
                 "required": self.required,
@@ -67,7 +65,7 @@ class CreateChatCompletion(BaseTool):
                 "properties": {
                     "response": {
                         "type": self.type_mapping.get(type_hint, "string"),
-                        "description": f"Response of type {type_hint.__name__}",
+                        "description": f"{type_hint.__name__} 类型的返回值",
                     }
                 },
                 "required": self.required,
@@ -114,7 +112,7 @@ class CreateChatCompletion(BaseTool):
 
         return {
             "type": self.type_mapping.get(type_hint, "string"),
-            "description": f"Value of type {getattr(type_hint, '__name__', 'any')}",
+            "description": f"{getattr(type_hint, '__name__', 'any')} 类型的值",
         }
 
     def _create_union_schema(self, types: tuple) -> dict:

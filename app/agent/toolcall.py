@@ -11,7 +11,6 @@ from app.prompt.toolcall import NEXT_STEP_PROMPT, SYSTEM_PROMPT
 from app.schema import TOOL_CHOICE_TYPE, AgentState, Message, ToolCall, ToolChoice
 from app.tool import CreateChatCompletion, Terminate, ToolCollection
 
-
 TOOL_CALL_REQUIRED = "Tool calls required but none provided"
 
 
@@ -134,8 +133,13 @@ class ToolCallAgent(ReActAgent):
             if self.tool_choices == ToolChoice.REQUIRED:
                 raise ValueError(TOOL_CALL_REQUIRED)
 
-            # Return last message content if no tool calls
-            return self.messages[-1].content or "No content or commands to execute"
+            # If the model produced a normal answer with no tool calls, treat it as final.
+            # This avoids needing a `terminate` tool call for simple Q&A.
+            last_content = (
+                self.messages[-1].content or "No content or commands to execute"
+            )
+            self.state = AgentState.FINISHED
+            return last_content
 
         results = []
         for command in self.tool_calls:
@@ -160,6 +164,11 @@ class ToolCallAgent(ReActAgent):
             )
             self.memory.add_message(tool_msg)
             results.append(result)
+
+        # If the model used the terminate tool, surface its final_answer cleanly.
+        if any(call.function.name == Terminate().name for call in self.tool_calls):
+            # The terminate tool's execute() returns the user-facing final answer.
+            return results[-1] if results else ""
 
         return "\n\n".join(results)
 

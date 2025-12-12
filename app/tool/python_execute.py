@@ -10,13 +10,15 @@ class PythonExecute(BaseTool):
     """A tool for executing Python code with timeout and safety restrictions."""
 
     name: str = "python_execute"
-    description: str = "Executes Python code string. Note: Only print outputs are visible, function return values are not captured. Use print statements to see results."
+    description: str = (
+        "执行一段 Python 代码字符串。注意：只会显示 print 输出，不会捕获函数返回值；如需查看结果请使用 print。"
+    )
     parameters: dict = {
         "type": "object",
         "properties": {
             "code": {
                 "type": "string",
-                "description": "The Python code to execute.",
+                "description": "要执行的 Python 代码。",
             },
         },
         "required": ["code"],
