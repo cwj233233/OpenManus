@@ -11,7 +11,7 @@ class PythonExecute(BaseTool):
 
     name: str = "python_execute"
     description: str = (
-        "执行一段 Python 代码字符串。注意：只会显示 print 输出，不会捕获函数返回值；如需查看结果请使用 print。"
+        "执行一段 Python 代码字符串。支持两种模式：1) 如果代码是表达式，会自动返回表达式的值；2) 如果代码包含 print 语句，会显示 print 的输出。"
     )
     parameters: dict = {
         "type": "object",
@@ -29,8 +29,20 @@ class PythonExecute(BaseTool):
         try:
             output_buffer = StringIO()
             sys.stdout = output_buffer
-            exec(code, safe_globals, safe_globals)
-            result_dict["observation"] = output_buffer.getvalue()
+
+            # 尝试用 eval 捕获表达式的返回值
+            try:
+                result = eval(code, safe_globals)
+                output = output_buffer.getvalue()
+                # 如果没有 print 输出但有返回值，显示返回值
+                if not output and result is not None:
+                    output = repr(result)
+                result_dict["observation"] = output
+            except SyntaxError:
+                # 如果是语句而不是表达式，使用 exec
+                exec(code, safe_globals, safe_globals)
+                result_dict["observation"] = output_buffer.getvalue()
+
             result_dict["success"] = True
         except Exception as e:
             result_dict["observation"] = str(e)

@@ -3,14 +3,13 @@ from datetime import datetime
 from typing import Any, ClassVar, Dict, Optional
 
 from daytona import Daytona, DaytonaConfig, Sandbox, SandboxState
-from pydantic import Field
+from pydantic import ConfigDict, Field
 
 from app.config import config
 from app.daytona.sandbox import create_sandbox, start_supervisord_session
 from app.tool.base import BaseTool
 from app.utils.files_utils import clean_path
 from app.utils.logger import logger
-
 
 # load_dotenv()
 daytona_settings = config.daytona
@@ -64,9 +63,7 @@ class SandboxToolsBase(BaseTool):
     workspace_path: str = Field(default="/workspace", exclude=True)
     _sessions: dict[str, str] = {}
 
-    class Config:
-        arbitrary_types_allowed = True  # Allow non-pydantic types like ThreadManager
-        underscore_attrs_are_private = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     async def _ensure_sandbox(self) -> Sandbox:
         """Ensure we have a valid sandbox instance, retrieving it from the project if needed."""

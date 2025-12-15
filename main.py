@@ -17,16 +17,16 @@ async def main():
     agent = await Manus.create()
     try:
         # Use command line prompt if provided, otherwise ask for input
-        prompt = args.prompt if args.prompt else input("Enter your prompt: ")
+        prompt = args.prompt if args.prompt else input("请输入你的提示: ")
         if not prompt.strip():
-            logger.warning("Empty prompt provided.")
+            logger.warning("提供的提示为空。")
             return
 
-        logger.warning("Processing your request...")
+        logger.warning("正在处理你的请求...")
         await agent.run(prompt)
-        logger.info("Request processing completed.")
+        logger.info("请求处理完成。")
     except KeyboardInterrupt:
-        logger.warning("Operation interrupted.")
+        logger.warning("操作已中断。")
     finally:
         # Ensure agent resources are cleaned up before exiting
         await agent.cleanup()

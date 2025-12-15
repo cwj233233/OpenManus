@@ -30,7 +30,6 @@ from app.schema import (
     ToolChoice,
 )
 
-
 REASONING_MODELS = ["o1", "o3-mini"]
 MULTIMODAL_MODELS = [
     "gpt-4-vision-preview",
@@ -241,9 +240,9 @@ class LLM:
         self.total_input_tokens += input_tokens
         self.total_completion_tokens += completion_tokens
         logger.info(
-            f"Token usage: Input={input_tokens}, Completion={completion_tokens}, "
-            f"Cumulative Input={self.total_input_tokens}, Cumulative Completion={self.total_completion_tokens}, "
-            f"Total={input_tokens + completion_tokens}, Cumulative Total={self.total_input_tokens + self.total_completion_tokens}"
+            f"Token 使用情况: 输入={input_tokens}, 完成={completion_tokens}, "
+            f"累计输入={self.total_input_tokens}, 累计完成={self.total_completion_tokens}, "
+            f"总计={input_tokens + completion_tokens}, 累计总计={self.total_input_tokens + self.total_completion_tokens}"
         )
 
     def check_token_limit(self, input_tokens: int) -> bool:
@@ -537,9 +536,7 @@ class LLM:
             multimodal_content = (
                 [{"type": "text", "text": content}]
                 if isinstance(content, str)
-                else content
-                if isinstance(content, list)
-                else []
+                else content if isinstance(content, list) else []
             )
 
             # Add images to content

@@ -77,15 +77,15 @@ class ToolCallAgent(ReActAgent):
         content = response.content if response and response.content else ""
 
         # Log response info
-        logger.info(f"✨ {self.name}'s thoughts: {content}")
+        logger.info(f"✨ {self.name} 的思考: {content}")
         logger.info(
-            f"🛠️ {self.name} selected {len(tool_calls) if tool_calls else 0} tools to use"
+            f"🛠️ {self.name} 选择了 {len(tool_calls) if tool_calls else 0} 个工具"
         )
         if tool_calls:
             logger.info(
-                f"🧰 Tools being prepared: {[call.function.name for call in tool_calls]}"
+                f"🧰 准备使用的工具: {[call.function.name for call in tool_calls]}"
             )
-            logger.info(f"🔧 Tool arguments: {tool_calls[0].function.arguments}")
+            logger.info(f"🔧 工具参数: {tool_calls[0].function.arguments}")
 
         try:
             if response is None:
@@ -152,7 +152,7 @@ class ToolCallAgent(ReActAgent):
                 result = result[: self.max_observe]
 
             logger.info(
-                f"🎯 Tool '{command.function.name}' completed its mission! Result: {result}"
+                f"🎯 工具 '{command.function.name}' 完成了任务! 结果: {result}"
             )
 
             # Add tool response to memory
@@ -186,7 +186,7 @@ class ToolCallAgent(ReActAgent):
             args = json.loads(command.function.arguments or "{}")
 
             # Execute the tool
-            logger.info(f"🔧 Activating tool: '{name}'...")
+            logger.info(f"🔧 激活工具: '{name}'...")
             result = await self.available_tools.execute(name=name, tool_input=args)
 
             # Handle special tools
@@ -223,7 +223,7 @@ class ToolCallAgent(ReActAgent):
 
         if self._should_finish_execution(name=name, result=result, **kwargs):
             # Set agent state to finished
-            logger.info(f"🏁 Special tool '{name}' has completed the task!")
+            logger.info(f"🏁 特殊工具 '{name}' 已完成任务!")
             self.state = AgentState.FINISHED
 
     @staticmethod
@@ -237,7 +237,7 @@ class ToolCallAgent(ReActAgent):
 
     async def cleanup(self):
         """Clean up resources used by the agent's tools."""
-        logger.info(f"🧹 Cleaning up resources for agent '{self.name}'...")
+        logger.info(f"🧹 正在清理代理 '{self.name}' 的资源...")
         for tool_name, tool_instance in self.available_tools.tool_map.items():
             if hasattr(tool_instance, "cleanup") and asyncio.iscoroutinefunction(
                 tool_instance.cleanup

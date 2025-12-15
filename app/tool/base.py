@@ -2,7 +2,7 @@ import json
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.utils.logger import logger
 
@@ -96,9 +96,7 @@ class BaseTool(ABC, BaseModel):
     parameters: Optional[dict] = None
     # _schemas: Dict[str, List[ToolSchema]] = {}
 
-    class Config:
-        arbitrary_types_allowed = True
-        underscore_attrs_are_private = False
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     # def __init__(self, **data):
     #     """Initialize tool with model validation and schema registration."""

@@ -122,7 +122,7 @@ class MCPClients(ToolCollection):
         # Update tools tuple
         self.tools = tuple(self.tool_map.values())
         logger.info(
-            f"Connected to server {server_id} with tools: {[tool.name for tool in response.tools]}"
+            f"已连接到服务器 {server_id}，可用工具: {[tool.name for tool in response.tools]}"
         )
 
     def _sanitize_tool_name(self, name: str) -> str:
@@ -182,7 +182,7 @@ class MCPClients(ToolCollection):
                         if v.server_id != server_id
                     }
                     self.tools = tuple(self.tool_map.values())
-                    logger.info(f"Disconnected from MCP server {server_id}")
+                    logger.info(f"已断开与 MCP 服务器 {server_id} 的连接")
                 except Exception as e:
                     logger.error(f"Error disconnecting from server {server_id}: {e}")
         else:
@@ -191,4 +191,4 @@ class MCPClients(ToolCollection):
                 await self.disconnect(sid)
             self.tool_map = {}
             self.tools = tuple()
-            logger.info("Disconnected from all MCP servers")
+            logger.info("已断开与所有 MCP 服务器的连接")
