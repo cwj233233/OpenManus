@@ -443,7 +443,7 @@ class ComputerUseTool(SandboxToolsBase):
                 if "image" in result:
                     base64_str = result["image"]
                     timestamp = time.strftime("%Y%m%d_%H%M%S")
-                    # Save screenshot to file
+                    # 保存screenshot to file
                     screenshots_dir = "screenshots"
                     if not os.path.exists(screenshots_dir):
                         os.makedirs(screenshots_dir)
@@ -451,11 +451,11 @@ class ComputerUseTool(SandboxToolsBase):
                         screenshots_dir, f"screenshot_{timestamp}.png"
                     )
                     latest_filename = "latest_screenshot.png"
-                    # Decode base64 string and save to file
+                    # 解码 base64 字符串并保存到文件
                     img_data = base64.b64decode(base64_str)
                     with open(timestamped_filename, "wb") as f:
                         f.write(img_data)
-                    # Save a copy as the latest screenshot
+                    # 保存a copy as the latest screenshot
                     with open(latest_filename, "wb") as f:
                         f.write(img_data)
                     return ToolResult(

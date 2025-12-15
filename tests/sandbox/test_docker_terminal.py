@@ -88,12 +88,12 @@ class TestAsyncDockerizedTerminal:
         await terminal.init()
         assert terminal.session is not None
         await terminal.close()
-        # Verify session is properly cleaned up
+        # 验证session is properly cleaned up
         # Note: session object still exists, but internal connection is closed
         assert terminal.session is not None
 
 
-# Configure pytest-asyncio
+# 配置 pytest-asyncio
 def pytest_configure(config):
     """Configure pytest-asyncio."""
     config.addinivalue_line("asyncio_mode", "strict")

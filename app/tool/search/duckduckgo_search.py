@@ -19,14 +19,14 @@ class DuckDuckGoSearchEngine(WebSearchEngine):
         results = []
         for i, item in enumerate(raw_results):
             if isinstance(item, str):
-                # If it's just a URL
+                # 如果它只是一个 URL
                 results.append(
                     SearchItem(
                         title=f"DuckDuckGo Result {i + 1}", url=item, description=None
                     )
                 )
             elif isinstance(item, dict):
-                # Extract data from the dictionary
+                # 提取data from the dictionary
                 results.append(
                     SearchItem(
                         title=item.get("title", f"DuckDuckGo Result {i + 1}"),
@@ -45,7 +45,7 @@ class DuckDuckGoSearchEngine(WebSearchEngine):
                         )
                     )
                 except Exception:
-                    # Fallback
+                    # 回退
                     results.append(
                         SearchItem(
                             title=f"DuckDuckGo Result {i + 1}",

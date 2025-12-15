@@ -19,7 +19,7 @@ class GoogleSearchEngine(WebSearchEngine):
         results = []
         for i, item in enumerate(raw_results):
             if isinstance(item, str):
-                # If it's just a URL
+                # 如果它只是一个 URL
                 results.append(
                     {"title": f"Google Result {i+1}", "url": item, "description": ""}
                 )

@@ -43,23 +43,23 @@ class SandboxManager:
         self.idle_timeout = idle_timeout
         self.cleanup_interval = cleanup_interval
 
-        # Docker client
+        # Docker 客户端
         self._client = docker.from_env()
 
         # Resource mappings
         self._sandboxes: Dict[str, DockerSandbox] = {}
         self._last_used: Dict[str, float] = {}
 
-        # Concurrency control
+        # 并发控制
         self._locks: Dict[str, asyncio.Lock] = {}
         self._global_lock = asyncio.Lock()
         self._active_operations: Set[str] = set()
 
-        # Cleanup task
+        # 清理任务
         self._cleanup_task: Optional[asyncio.Task] = None
         self._is_shutting_down = False
 
-        # Start automatic cleanup
+        # 启动automatic cleanup
         self.start_cleanup_task()
 
     async def ensure_image(self, image: str) -> bool:
@@ -208,7 +208,7 @@ class SandboxManager:
         logger.info("Starting manager cleanup...")
         self._is_shutting_down = True
 
-        # Cancel cleanup task
+        # 取消清理任务
         if self._cleanup_task:
             self._cleanup_task.cancel()
             try:
@@ -216,24 +216,24 @@ class SandboxManager:
             except (asyncio.CancelledError, asyncio.TimeoutError):
                 pass
 
-        # Get all sandbox IDs to clean up
+        # 获取all sandbox IDs to clean up
         async with self._global_lock:
             sandbox_ids = list(self._sandboxes.keys())
 
-        # Concurrently clean up all sandboxes
+        # 并发清理所有沙箱
         cleanup_tasks = []
         for sandbox_id in sandbox_ids:
             task = asyncio.create_task(self._safe_delete_sandbox(sandbox_id))
             cleanup_tasks.append(task)
 
         if cleanup_tasks:
-            # Wait for all cleanup tasks to complete, with timeout to avoid infinite waiting
+            # 等待all cleanup tasks to complete, with timeout to avoid infinite waiting
             try:
                 await asyncio.wait(cleanup_tasks, timeout=30.0)
             except asyncio.TimeoutError:
                 logger.error("Sandbox cleanup timed out")
 
-        # Clean up remaining references
+        # 清理剩余引用
         self._sandboxes.clear()
         self._last_used.clear()
         self._locks.clear()
@@ -261,12 +261,12 @@ class SandboxManager:
                         f"Timeout waiting for sandbox {sandbox_id} operations to complete"
                     )
 
-            # Get reference to sandbox object
+            # 获取reference to sandbox object
             sandbox = self._sandboxes.get(sandbox_id)
             if sandbox:
                 await sandbox.cleanup()
 
-                # Remove sandbox record from manager
+                # 移除sandbox record from manager
                 async with self._global_lock:
                     self._sandboxes.pop(sandbox_id, None)
                     self._last_used.pop(sandbox_id, None)

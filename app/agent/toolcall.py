@@ -42,7 +42,7 @@ class ToolCallAgent(ReActAgent):
             self.messages += [user_msg]
 
         try:
-            # Get response with tool options
+            # 获取response with tool options
             response = await self.llm.ask_tool(
                 messages=self.messages,
                 system_msgs=(
@@ -56,7 +56,7 @@ class ToolCallAgent(ReActAgent):
         except ValueError:
             raise
         except Exception as e:
-            # Check if this is a RetryError containing TokenLimitExceeded
+            # 检查是否this is a RetryError containing TokenLimitExceeded
             if hasattr(e, "__cause__") and isinstance(e.__cause__, TokenLimitExceeded):
                 token_limit_error = e.__cause__
                 logger.error(
@@ -91,7 +91,7 @@ class ToolCallAgent(ReActAgent):
             if response is None:
                 raise RuntimeError("No response received from the LLM")
 
-            # Handle different tool_choices modes
+            # 处理different tool_choices modes
             if self.tool_choices == ToolChoice.NONE:
                 if tool_calls:
                     logger.warning(
@@ -102,7 +102,7 @@ class ToolCallAgent(ReActAgent):
                     return True
                 return False
 
-            # Create and add assistant message
+            # 创建and add assistant message
             assistant_msg = (
                 Message.from_tool_calls(content=content, tool_calls=self.tool_calls)
                 if self.tool_calls
@@ -113,7 +113,7 @@ class ToolCallAgent(ReActAgent):
             if self.tool_choices == ToolChoice.REQUIRED and not self.tool_calls:
                 return True  # Will be handled in act()
 
-            # For 'auto' mode, continue with content if no commands but content exists
+            # 对于 'auto' 模式，如果没有命令但有内容，则继续使用内容
             if self.tool_choices == ToolChoice.AUTO and not self.tool_calls:
                 return bool(content)
 
@@ -133,7 +133,7 @@ class ToolCallAgent(ReActAgent):
             if self.tool_choices == ToolChoice.REQUIRED:
                 raise ValueError(TOOL_CALL_REQUIRED)
 
-            # If the model produced a normal answer with no tool calls, treat it as final.
+            # 如果模型产生了没有工具调用的正常答案，将其视为最终答案
             # This avoids needing a `terminate` tool call for simple Q&A.
             last_content = (
                 self.messages[-1].content or "No content or commands to execute"
@@ -155,7 +155,7 @@ class ToolCallAgent(ReActAgent):
                 f"🎯 Tool '{command.function.name}' completed its mission! Result: {result}"
             )
 
-            # Add tool response to memory
+            # 添加tool response to memory
             tool_msg = Message.tool_message(
                 content=result,
                 tool_call_id=command.id,
@@ -165,7 +165,7 @@ class ToolCallAgent(ReActAgent):
             self.memory.add_message(tool_msg)
             results.append(result)
 
-        # If the model used the terminate tool, surface its final_answer cleanly.
+        # 如果模型使用了终止工具，清晰地显示其 final_answer
         if any(call.function.name == Terminate().name for call in self.tool_calls):
             # The terminate tool's execute() returns the user-facing final answer.
             return results[-1] if results else ""
@@ -182,22 +182,22 @@ class ToolCallAgent(ReActAgent):
             return f"Error: Unknown tool '{name}'"
 
         try:
-            # Parse arguments
+            # 解析arguments
             args = json.loads(command.function.arguments or "{}")
 
-            # Execute the tool
+            # 执行工具
             logger.info(f"🔧 Activating tool: '{name}'...")
             result = await self.available_tools.execute(name=name, tool_input=args)
 
-            # Handle special tools
+            # 处理special tools
             await self._handle_special_tool(name=name, result=result)
 
-            # Check if result is a ToolResult with base64_image
+            # 检查是否result is a ToolResult with base64_image
             if hasattr(result, "base64_image") and result.base64_image:
-                # Store the base64_image for later use in tool_message
+                # 存储the base64_image for later use in tool_message
                 self._current_base64_image = result.base64_image
 
-            # Format result for display (standard case)
+            # 格式化result for display (standard case)
             observation = (
                 f"Observed output of cmd `{name}` executed:\n{str(result)}"
                 if result
@@ -222,7 +222,7 @@ class ToolCallAgent(ReActAgent):
             return
 
         if self._should_finish_execution(name=name, result=result, **kwargs):
-            # Set agent state to finished
+            # 设置agent state to finished
             logger.info(f"🏁 Special tool '{name}' has completed the task!")
             self.state = AgentState.FINISHED
 

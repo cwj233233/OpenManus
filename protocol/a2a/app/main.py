@@ -66,7 +66,7 @@ async def main(host: str = "localhost", port: int = 10000):
                 tags=["terminate task"],
                 examples=["terminate"],
             ),
-            # Add more skills as needed
+            # 根据需要添加更多技能
         ]
 
         agent_card = AgentCard(
@@ -115,7 +115,7 @@ def run_server(host: Optional[str] = "localhost", port: Optional[int] = 10000):
 
 
 if __name__ == "__main__":
-    # Parse command line arguments for host and port, with default values
+    # 解析command line arguments for host and port, with default values
     parser = argparse.ArgumentParser(description="Start Manus Agent service")
     parser.add_argument(
         "--host",
@@ -127,5 +127,5 @@ if __name__ == "__main__":
         "--port", type=int, default=10000, help="Server port, default is 10000"
     )
     args = parser.parse_args()
-    # Start the server with the specified or default host and port
+    # 启动the server with the specified or default host and port
     run_server(args.host, args.port)

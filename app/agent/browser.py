@@ -9,7 +9,7 @@ from app.prompt.browser import NEXT_STEP_PROMPT, SYSTEM_PROMPT
 from app.schema import Message, ToolChoice
 from app.tool import BrowserUseTool, Terminate, ToolCollection
 
-# Avoid circular import if BrowserAgent needs BrowserContextHelper
+# 避免循环导入
 if TYPE_CHECKING:
     from app.agent.base import BaseAgent  # Or wherever memory is defined
 
@@ -23,7 +23,7 @@ class BrowserContextHelper:
         browser_tool = self.agent.available_tools.get_tool(BrowserUseTool().name)
         if not browser_tool:
             # SandboxBrowserTool depends on the optional 'daytona' package.
-            # Import it lazily so the project can run without daytona installed.
+            # 延迟导入它，以便项目可以在没有安装 daytona 的情况下运行
             try:
                 from app.tool.sandbox.sb_browser_tool import SandboxBrowserTool  # noqa
 
@@ -31,7 +31,7 @@ class BrowserContextHelper:
                     SandboxBrowserTool().name
                 )
             except ModuleNotFoundError as e:
-                # If daytona (or other optional deps) are missing, just skip sandbox browser state.
+                # 如果缺少 daytona（或其他可选依赖项），只需跳过沙箱浏览器状态
                 logger.debug(f"Sandbox browser tool unavailable: {e}")
                 browser_tool = None
         if not browser_tool or not hasattr(browser_tool, "get_current_state"):
@@ -108,7 +108,7 @@ class BrowserAgent(ToolCallAgent):
     max_observe: int = 10000
     max_steps: int = 20
 
-    # Configure the available tools
+    # 配置可用工具
     available_tools: ToolCollection = Field(
         default_factory=lambda: ToolCollection(BrowserUseTool(), Terminate())
     )

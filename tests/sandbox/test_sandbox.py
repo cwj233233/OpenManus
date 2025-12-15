@@ -60,7 +60,7 @@ with open('/workspace/test.txt') as f:
 """
     await sandbox.write_file("/workspace/test.py", python_code)
 
-    # Execute script and verify output
+    # 执行脚本并验证输出
     result = await sandbox.terminal.run_command("python3 /workspace/test.py")
     assert "Hello from Python!" in result
     assert "Hello from file!" in result
@@ -69,7 +69,7 @@ with open('/workspace/test.txt') as f:
 @pytest.mark.asyncio
 async def test_sandbox_file_persistence(sandbox):
     """Tests file persistence in sandbox."""
-    # Create multiple files
+    # 创建multiple files
     files = {
         "file1.txt": "Content 1",
         "file2.txt": "Content 2",
@@ -80,7 +80,7 @@ async def test_sandbox_file_persistence(sandbox):
     for path, content in files.items():
         await sandbox.write_file(f"/workspace/{path}", content)
 
-    # Verify file contents
+    # 验证file contents
     for path, expected_content in files.items():
         content = await sandbox.read_file(f"/workspace/{path}")
         assert content.strip() == expected_content
@@ -123,13 +123,13 @@ async def test_sandbox_cleanup(sandbox_config):
     sandbox = DockerSandbox(sandbox_config)
     await sandbox.create()
 
-    # Create test files
+    # 创建test files
     await sandbox.write_file("/workspace/test.txt", "test")
     container_id = sandbox.terminal.container.id
     # Perform cleanup
     await sandbox.cleanup()
 
-    # Verify container has been removed
+    # 验证container has been removed
     import docker
 
     client = docker.from_env()

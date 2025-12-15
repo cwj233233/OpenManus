@@ -102,14 +102,14 @@ class SandboxFilesTool(SandboxToolsBase):
         """Get the current workspace state by reading all files"""
         files_state = {}
         try:
-            # Ensure sandbox is initialized
+            # 确保sandbox is initialized
             await self._ensure_sandbox()
 
             files = self.sandbox.fs.list_files(self.workspace_path)
             for file_info in files:
                 rel_path = file_info.name
 
-                # Skip excluded files and directories
+                # 跳过excluded files and directories
                 if self._should_exclude_file(rel_path) or file_info.is_dir:
                     continue
 
@@ -157,7 +157,7 @@ class SandboxFilesTool(SandboxToolsBase):
         """
         async with asyncio.Lock():
             try:
-                # File creation
+                # 文件创建
                 if action == "create_file":
                     if not file_path or not file_contents:
                         return self.fail_response(
@@ -175,7 +175,7 @@ class SandboxFilesTool(SandboxToolsBase):
                         )
                     return await self._str_replace(file_path, old_str, new_str)
 
-                # Full file rewrite
+                # 完整文件重写
                 elif action == "full_file_rewrite":
                     if not file_path or not file_contents:
                         return self.fail_response(
@@ -185,7 +185,7 @@ class SandboxFilesTool(SandboxToolsBase):
                         file_path, file_contents, permissions
                     )
 
-                # File deletion
+                # 文件删除
                 elif action == "delete_file":
                     if not file_path:
                         return self.fail_response(
@@ -205,7 +205,7 @@ class SandboxFilesTool(SandboxToolsBase):
     ) -> ToolResult:
         """Create a new file with the provided contents"""
         try:
-            # Ensure sandbox is initialized
+            # 确保sandbox is initialized
             await self._ensure_sandbox()
 
             file_path = self.clean_path(file_path)
@@ -215,7 +215,7 @@ class SandboxFilesTool(SandboxToolsBase):
                     f"File '{file_path}' already exists. Use full_file_rewrite to modify existing files."
                 )
 
-            # Create parent directories if needed
+            # 创建parent directories if needed
             parent_dir = "/".join(full_path.split("/")[:-1])
             if parent_dir:
                 self.sandbox.fs.create_folder(parent_dir, "755")
@@ -226,7 +226,7 @@ class SandboxFilesTool(SandboxToolsBase):
 
             message = f"File '{file_path}' created successfully."
 
-            # Check if index.html was created and add 8080 server info (only in root workspace)
+            # 检查是否创建了 index.html 并添加 8080 服务器信息（仅在根工作区）
             if file_path.lower() == "index.html":
                 try:
                     website_link = self.sandbox.get_preview_link(8080)
@@ -251,7 +251,7 @@ class SandboxFilesTool(SandboxToolsBase):
     ) -> ToolResult:
         """Replace specific text in a file"""
         try:
-            # Ensure sandbox is initialized
+            # 确保sandbox is initialized
             await self._ensure_sandbox()
 
             file_path = self.clean_path(file_path)
@@ -298,7 +298,7 @@ class SandboxFilesTool(SandboxToolsBase):
     ) -> ToolResult:
         """Completely rewrite an existing file with new content"""
         try:
-            # Ensure sandbox is initialized
+            # 确保sandbox is initialized
             await self._ensure_sandbox()
 
             file_path = self.clean_path(file_path)
@@ -313,7 +313,7 @@ class SandboxFilesTool(SandboxToolsBase):
 
             message = f"File '{file_path}' completely rewritten successfully."
 
-            # Check if index.html was rewritten and add 8080 server info (only in root workspace)
+            # 检查是否重写了 index.html 并添加 8080 服务器信息（仅在根工作区）
             if file_path.lower() == "index.html":
                 try:
                     website_link = self.sandbox.get_preview_link(8080)
@@ -336,7 +336,7 @@ class SandboxFilesTool(SandboxToolsBase):
     async def _delete_file(self, file_path: str) -> ToolResult:
         """Delete a file at the given path"""
         try:
-            # Ensure sandbox is initialized
+            # 确保sandbox is initialized
             await self._ensure_sandbox()
 
             file_path = self.clean_path(file_path)

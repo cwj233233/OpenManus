@@ -66,25 +66,25 @@ class SearchResponse(ToolResult):
         result_text = [f"Search results for '{self.query}':"]
 
         for i, result in enumerate(self.results, 1):
-            # Add title with position number
+            # 添加title with position number
             title = result.title.strip() or "No title"
             result_text.append(f"\n{i}. {title}")
 
-            # Add URL with proper indentation
+            # 添加URL with proper indentation
             result_text.append(f"   URL: {result.url}")
 
-            # Add description if available
+            # 如果可用，添加描述
             if result.description.strip():
                 result_text.append(f"   Description: {result.description}")
 
-            # Add content preview if available
+            # 如果可用，添加内容预览
             if result.raw_content:
                 content_preview = result.raw_content[:1000].replace("\n", " ").strip()
                 if len(result.raw_content) > 1000:
                     content_preview += "..."
                 result_text.append(f"   Content: {content_preview}")
 
-        # Add metadata at the bottom if available
+        # 如果可用，在底部添加元数据
         if self.metadata:
             result_text.extend(
                 [
@@ -130,17 +130,17 @@ class WebContentFetcher:
                 )
                 return None
 
-            # Parse HTML with BeautifulSoup
+            # 解析HTML with BeautifulSoup
             soup = BeautifulSoup(response.text, "html.parser")
 
-            # Remove script and style elements
+            # 移除script and style elements
             for script in soup(["script", "style", "header", "footer", "nav"]):
                 script.extract()
 
-            # Get text content
+            # 获取text content
             text = soup.get_text(separator="\n", strip=True)
 
-            # Clean up whitespace and limit size (100KB max)
+            # 清理空白并限制大小（最大 100KB）
             text = " ".join(text.split())
             return text[:10000] if text else None
 
@@ -215,7 +215,7 @@ class WebSearch(BaseTool):
         Returns:
             A structured response containing search results and metadata
         """
-        # Get settings from config
+        # 获取settings from config
         retry_delay = (
             getattr(config.search_config, "retry_delay", 60)
             if config.search_config
@@ -249,7 +249,7 @@ class WebSearch(BaseTool):
             results = await self._try_all_engines(query, num_results, search_params)
 
             if results:
-                # Fetch content if requested
+                # 获取content if requested
                 if fetch_content:
                     results = await self._fetch_content_for_results(results)
 
@@ -266,7 +266,7 @@ class WebSearch(BaseTool):
                 )
 
             if retry_count < max_retries:
-                # All engines failed, wait and retry
+                # 所有引擎都失败了，等待并重试
                 logger.warning(
                     f"All search engines failed. Waiting {retry_delay} seconds before retry {retry_count + 1}/{max_retries}..."
                 )
@@ -329,13 +329,13 @@ class WebSearch(BaseTool):
         if not results:
             return []
 
-        # Create tasks for each result
+        # 创建tasks for each result
         tasks = [self._fetch_single_result_content(result) for result in results]
 
         # Type annotation to help type checker
         fetched_results = await asyncio.gather(*tasks)
 
-        # Explicit validation of return type
+        # 显式验证返回类型
         return [
             (
                 result
@@ -367,7 +367,7 @@ class WebSearch(BaseTool):
             else []
         )
 
-        # Start with preferred engine, then fallbacks, then remaining engines
+        # 启动with preferred engine, then fallbacks, then remaining engines
         engine_order = [preferred] if preferred in self._search_engine else []
         engine_order.extend(
             [

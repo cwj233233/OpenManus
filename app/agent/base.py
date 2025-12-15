@@ -17,11 +17,11 @@ class BaseAgent(BaseModel, ABC):
     and a step-based execution loop. Subclasses must implement the `step` method.
     """
 
-    # Core attributes
+    # 核心属性
     name: str = Field(..., description="Unique name of the agent")
     description: Optional[str] = Field(None, description="Optional agent description")
 
-    # Prompts
+    # 提示词
     system_prompt: Optional[str] = Field(
         None, description="System-level instruction prompt"
     )
@@ -29,14 +29,14 @@ class BaseAgent(BaseModel, ABC):
         None, description="Prompt for determining next action"
     )
 
-    # Dependencies
+    # 依赖项
     llm: LLM = Field(default_factory=LLM, description="Language model instance")
     memory: Memory = Field(default_factory=Memory, description="Agent's memory store")
     state: AgentState = Field(
         default=AgentState.IDLE, description="Current agent state"
     )
 
-    # Execution control
+    # 执行控制
     max_steps: int = Field(default=10, description="Maximum steps before termination")
     current_step: int = Field(default=0, description="Current step in execution")
 
@@ -109,7 +109,7 @@ class BaseAgent(BaseModel, ABC):
         if role not in message_map:
             raise ValueError(f"Unsupported message role: {role}")
 
-        # Create message with appropriate parameters based on role
+        # 根据角色创建具有适当参数的消息
         kwargs = {"base64_image": base64_image, **(kwargs if role == "tool" else {})}
         self.memory.add_message(message_map[role](content, **kwargs))
 
@@ -140,7 +140,7 @@ class BaseAgent(BaseModel, ABC):
                 logger.info(f"Executing step {self.current_step}/{self.max_steps}")
                 step_result = await self.step()
 
-                # Check for stuck state
+                # 检查是否陷入卡顿状态
                 if self.is_stuck():
                     self.handle_stuck_state()
 
@@ -176,7 +176,7 @@ class BaseAgent(BaseModel, ABC):
         if not last_message.content:
             return False
 
-        # Count identical content occurrences
+        # 计算相同内容出现的次数
         duplicate_count = sum(
             1
             for msg in reversed(self.memory.messages[:-1])

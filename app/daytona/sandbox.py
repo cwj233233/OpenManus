@@ -50,7 +50,7 @@ async def get_or_start_sandbox(sandbox_id: str):
     try:
         sandbox = daytona.get(sandbox_id)
 
-        # Check if sandbox needs to be started
+        # 检查是否sandbox needs to be started
         if (
             sandbox.state == SandboxState.ARCHIVED
             or sandbox.state == SandboxState.STOPPED
@@ -63,7 +63,7 @@ async def get_or_start_sandbox(sandbox_id: str):
                 # Refresh sandbox state after starting
                 sandbox = daytona.get(sandbox_id)
 
-                # Start supervisord in a session when restarting
+                # 启动supervisord in a session when restarting
                 start_supervisord_session(sandbox)
             except Exception as e:
                 logger.error(f"Error starting sandbox: {e}")
@@ -84,7 +84,7 @@ def start_supervisord_session(sandbox: Sandbox):
         logger.info(f"Creating session {session_id} for supervisord")
         sandbox.process.create_session(session_id)
 
-        # Execute supervisord command
+        # 执行 supervisord 命令
         sandbox.process.execute_session_command(
             session_id,
             SessionExecuteRequest(
@@ -136,11 +136,11 @@ def create_sandbox(password: str, project_id: str = None):
         auto_archive_interval=24 * 60,
     )
 
-    # Create the sandbox
+    # 创建the sandbox
     sandbox = daytona.create(params)
     logger.info(f"Sandbox created with ID: {sandbox.id}")
 
-    # Start supervisord in a session for new sandbox
+    # 启动supervisord in a session for new sandbox
     start_supervisord_session(sandbox)
 
     logger.info(f"Sandbox environment successfully initialized")
@@ -152,10 +152,10 @@ async def delete_sandbox(sandbox_id: str):
     logger.info(f"Deleting sandbox with ID: {sandbox_id}")
 
     try:
-        # Get the sandbox
+        # 获取the sandbox
         sandbox = daytona.get(sandbox_id)
 
-        # Delete the sandbox
+        # 删除the sandbox
         daytona.delete(sandbox)
 
         logger.info(f"Successfully deleted sandbox {sandbox_id}")

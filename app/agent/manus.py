@@ -30,7 +30,7 @@ class Manus(ToolCallAgent):
     # MCP clients for remote tool access
     mcp_clients: MCPClients = Field(default_factory=MCPClients)
 
-    # Add general-purpose tools to the tool collection
+    # 将通用工具添加到工具集合
     available_tools: ToolCollection = Field(
         default_factory=lambda: ToolCollection(
             PythonExecute(),
@@ -105,7 +105,7 @@ class Manus(ToolCallAgent):
             await self.mcp_clients.connect_sse(server_url, server_id)
             self.connected_servers[server_id or server_url] = server_url
 
-        # Update available tools with only the new tools from this server
+        # 更新available tools with only the new tools from this server
         new_tools = [
             tool for tool in self.mcp_clients.tools if tool.server_id == server_id
         ]
@@ -132,7 +132,7 @@ class Manus(ToolCallAgent):
         """Clean up Manus agent resources."""
         if self.browser_context_helper:
             await self.browser_context_helper.cleanup_browser()
-        # Disconnect from all MCP servers only if we were initialized
+        # 断开连接from all MCP servers only if we were initialized
         if self._initialized:
             await self.disconnect_mcp_server()
             self._initialized = False

@@ -140,7 +140,7 @@ class PlanningTool(BaseTool):
                 "Parameter `steps` must be a non-empty list of strings for command: create"
             )
 
-        # Create a new plan with initialized step statuses
+        # 创建a new plan with initialized step statuses
         plan = {
             "plan_id": plan_id,
             "title": title,
@@ -184,12 +184,12 @@ class PlanningTool(BaseTool):
             old_statuses = plan["step_statuses"]
             old_notes = plan["step_notes"]
 
-            # Create new step statuses and notes
+            # 创建new step statuses and notes
             new_statuses = []
             new_notes = []
 
             for i, step in enumerate(steps):
-                # If the step exists at the same position in old steps, preserve status and notes
+                # 如果步骤在旧步骤中的相同位置存在，保留状态和注释
                 if i < len(old_steps) and step == old_steps[i]:
                     new_statuses.append(old_statuses[i])
                     new_notes.append(old_notes[i])
@@ -227,7 +227,7 @@ class PlanningTool(BaseTool):
     def _get_plan(self, plan_id: Optional[str]) -> ToolResult:
         """Get details of a specific plan."""
         if not plan_id:
-            # If no plan_id is provided, use the current active plan
+            # 如果未提供 plan_id，使用当前活动计划
             if not self._current_plan_id:
                 raise ToolError(
                     "No active plan. Please specify a plan_id or set an active plan."
@@ -262,7 +262,7 @@ class PlanningTool(BaseTool):
     ) -> ToolResult:
         """Mark a step with a specific status and optional notes."""
         if not plan_id:
-            # If no plan_id is provided, use the current active plan
+            # 如果未提供 plan_id，使用当前活动计划
             if not self._current_plan_id:
                 raise ToolError(
                     "No active plan. Please specify a plan_id or set an active plan."
@@ -312,7 +312,7 @@ class PlanningTool(BaseTool):
 
         del self.plans[plan_id]
 
-        # If the deleted plan was the active plan, clear the active plan
+        # 如果删除的计划是活动计划，清除活动计划
         if self._current_plan_id == plan_id:
             self._current_plan_id = None
 
@@ -323,7 +323,7 @@ class PlanningTool(BaseTool):
         output = f"Plan: {plan['title']} (ID: {plan['plan_id']})\n"
         output += "=" * len(output) + "\n\n"
 
-        # Calculate progress statistics
+        # 计算进度统计
         total_steps = len(plan["steps"])
         completed = sum(1 for status in plan["step_statuses"] if status == "completed")
         in_progress = sum(
@@ -344,7 +344,7 @@ class PlanningTool(BaseTool):
         output += f"Status: {completed} completed, {in_progress} in progress, {blocked} blocked, {not_started} not started\n\n"
         output += "Steps:\n"
 
-        # Add each step with its status and notes
+        # 添加每个步骤及其状态和注释
         for i, (step, status, notes) in enumerate(
             zip(plan["steps"], plan["step_statuses"], plan["step_notes"])
         ):

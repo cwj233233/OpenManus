@@ -54,7 +54,7 @@ class MCPClients(ToolCollection):
 
         server_id = server_id or server_url
 
-        # Always ensure clean disconnection before new connection
+        # 始终在新连接前确保干净断开
         if server_id in self.sessions:
             await self.disconnect(server_id)
 
@@ -77,7 +77,7 @@ class MCPClients(ToolCollection):
 
         server_id = server_id or command
 
-        # Always ensure clean disconnection before new connection
+        # 始终在新连接前确保干净断开
         if server_id in self.sessions:
             await self.disconnect(server_id)
 
@@ -103,7 +103,7 @@ class MCPClients(ToolCollection):
         await session.initialize()
         response = await session.list_tools()
 
-        # Create proper tool objects for each server tool
+        # 创建proper tool objects for each server tool
         for tool in response.tools:
             original_name = tool.name
             tool_name = f"mcp_{server_id}_{original_name}"
@@ -119,7 +119,7 @@ class MCPClients(ToolCollection):
             )
             self.tool_map[tool_name] = server_tool
 
-        # Update tools tuple
+        # 更新tools tuple
         self.tools = tuple(self.tool_map.values())
         logger.info(
             f"Connected to server {server_id} with tools: {[tool.name for tool in response.tools]}"
@@ -132,10 +132,10 @@ class MCPClients(ToolCollection):
         # Replace invalid characters with underscores
         sanitized = re.sub(r"[^a-zA-Z0-9_-]", "_", name)
 
-        # Remove consecutive underscores
+        # 移除consecutive underscores
         sanitized = re.sub(r"_+", "_", sanitized)
 
-        # Remove leading/trailing underscores
+        # 移除leading/trailing underscores
         sanitized = sanitized.strip("_")
 
         # Truncate to 64 characters if needed
@@ -159,7 +159,7 @@ class MCPClients(ToolCollection):
                 try:
                     exit_stack = self.exit_stacks.get(server_id)
 
-                    # Close the exit stack which will handle session cleanup
+                    # 关闭the exit stack which will handle session cleanup
                     if exit_stack:
                         try:
                             await exit_stack.aclose()
@@ -171,11 +171,11 @@ class MCPClients(ToolCollection):
                             else:
                                 raise
 
-                    # Clean up references
+                    # 清理引用
                     self.sessions.pop(server_id, None)
                     self.exit_stacks.pop(server_id, None)
 
-                    # Remove tools associated with this server
+                    # 移除tools associated with this server
                     self.tool_map = {
                         k: v
                         for k, v in self.tool_map.items()
@@ -186,7 +186,7 @@ class MCPClients(ToolCollection):
                 except Exception as e:
                     logger.error(f"Error disconnecting from server {server_id}: {e}")
         else:
-            # Disconnect from all servers in a deterministic order
+            # 断开连接from all servers in a deterministic order
             for sid in sorted(list(self.sessions.keys())):
                 await self.disconnect(sid)
             self.tool_map = {}

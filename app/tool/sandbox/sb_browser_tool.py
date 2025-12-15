@@ -362,7 +362,7 @@ class SandboxBrowserTool(SandboxToolsBase):
                 return await self._execute_browser_action(
                     "scroll_to_text", {"text": text}
                 )
-            # Dropdown actions
+            # 下拉操作
             elif action == "get_dropdown_options":
                 if index is None:
                     return self.fail_response(
@@ -379,7 +379,7 @@ class SandboxBrowserTool(SandboxToolsBase):
                 return await self._execute_browser_action(
                     "select_dropdown_option", {"index": index, "text": text}
                 )
-                # Coordinate-based actions
+                # 基于坐标的操作
             elif action == "click_coordinates":
                 if x is None or y is None:
                     return self.fail_response(
@@ -426,7 +426,7 @@ class SandboxBrowserTool(SandboxToolsBase):
                 return ToolResult(error="Browser context not initialized")
             state = message.content
             screenshot = state.get("screenshot_base64")
-            # Build the state info with all required fields
+            # 使用所有必需字段构建状态信息
             state_info = {
                 "url": state.get("url", ""),
                 "title": state.get("title", ""),

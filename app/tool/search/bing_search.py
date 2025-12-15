@@ -112,7 +112,7 @@ class BingSearchEngine(WebSearchEngine):
 
                     rank_start += 1
 
-                    # Create a SearchItem object
+                    # 创建a SearchItem object
                     list_data.append(
                         SearchItem(
                             title=title or f"Bing Result {rank_start}",
