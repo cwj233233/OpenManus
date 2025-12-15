@@ -81,15 +81,15 @@ class DockerSession:
         """
         try:
             if self.socket:
-                # 发送exit command to close bash session
+                # Send exit command to close bash session
                 try:
                     self.socket.sendall(b"exit\n")
-                    # 为命令执行留出时间
+                    # Allow time for command execution
                     await asyncio.sleep(0.1)
                 except:
                     pass  # Ignore sending errors, continue cleanup
 
-                # 关闭socket connection
+                # Close socket connection
                 try:
                     self.socket.shutdown(socket.SHUT_RDWR)
                 except:
@@ -100,10 +100,10 @@ class DockerSession:
 
             if self.exec_id:
                 try:
-                    # 检查执行实例状态
+                    # Check exec instance status
                     exec_inspect = self.api.exec_inspect(self.exec_id)
                     if exec_inspect.get("Running", False):
-                        # 如果仍在运行，等待其完成
+                        # If still running, wait for it to complete
                         await asyncio.sleep(0.5)
                 except:
                     pass  # Ignore inspection errors, continue cleanup
@@ -228,7 +228,7 @@ class DockerSession:
             ValueError: If command contains potentially dangerous patterns.
         """
 
-        # 对特定危险命令的额外检查
+        # Additional checks for specific risky commands
         risky_commands = [
             "rm -rf /",
             "rm -rf /*",

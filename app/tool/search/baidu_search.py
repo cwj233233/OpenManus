@@ -16,16 +16,16 @@ class BaiduSearchEngine(WebSearchEngine):
         """
         raw_results = search(query, num_results=num_results)
 
-        # 转换raw results to SearchItem format
+        # Convert raw results to SearchItem format
         results = []
         for i, item in enumerate(raw_results):
             if isinstance(item, str):
-                # 如果它只是一个 URL
+                # If it's just a URL
                 results.append(
                     SearchItem(title=f"Baidu Result {i+1}", url=item, description=None)
                 )
             elif isinstance(item, dict):
-                # 如果它是一个包含详细信息的字典
+                # If it's a dictionary with details
                 results.append(
                     SearchItem(
                         title=item.get("title", f"Baidu Result {i+1}"),
@@ -44,7 +44,7 @@ class BaiduSearchEngine(WebSearchEngine):
                         )
                     )
                 except Exception:
-                    # 回退到基本结果
+                    # Fallback to a basic result
                     results.append(
                         SearchItem(
                             title=f"Baidu Result {i+1}", url=str(item), description=None

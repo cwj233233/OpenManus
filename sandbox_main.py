@@ -6,14 +6,14 @@ from app.logger import logger
 
 
 async def main():
-    # 解析command line arguments
+    # Parse command line arguments
     parser = argparse.ArgumentParser(description="Run Manus agent with a prompt")
     parser.add_argument(
         "--prompt", type=str, required=False, help="Input prompt for the agent"
     )
     args = parser.parse_args()
 
-    # 创建and initialize Manus agent
+    # Create and initialize Manus agent
     agent = await SandboxManus.create()
     try:
         # Use command line prompt if provided, otherwise ask for input
@@ -28,7 +28,7 @@ async def main():
     except KeyboardInterrupt:
         logger.warning("Operation interrupted.")
     finally:
-        # 确保agent resources are cleaned up before exiting
+        # Ensure agent resources are cleaned up before exiting
         await agent.cleanup()
 
 

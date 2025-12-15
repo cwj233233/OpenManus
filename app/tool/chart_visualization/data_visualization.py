@@ -241,7 +241,7 @@ class DataVisualization(BaseTool):
             "directory": str(config.workspace_root),
             "language": language,
         }
-        # 构建异步子进程
+        # build async sub process
         process = await asyncio.create_subprocess_exec(
             "npx",
             "ts-node",

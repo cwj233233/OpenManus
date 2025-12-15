@@ -54,23 +54,23 @@ class PlanningFlow(BaseFlow):
     def __init__(
         self, agents: Union[BaseAgent, List[BaseAgent], Dict[str, BaseAgent]], **data
     ):
-        # 设置executor keys before super().__init__
+        # Set executor keys before super().__init__
         if "executors" in data:
             data["executor_keys"] = data.pop("executors")
 
-        # 设置plan ID if provided
+        # Set plan ID if provided
         if "plan_id" in data:
             data["active_plan_id"] = data.pop("plan_id")
 
-        # 初始化the planning tool if not provided
+        # Initialize the planning tool if not provided
         if "planning_tool" not in data:
             planning_tool = PlanningTool()
             data["planning_tool"] = planning_tool
 
-        # 使用处理后的数据调用父类的 init
+        # Call parent's init with the processed data
         super().__init__(agents, **data)
 
-        # 设置executor_keys to all agent keys if not specified
+        # Set executor_keys to all agent keys if not specified
         if not self.executor_keys:
             self.executor_keys = list(self.agents.keys())
 
@@ -79,7 +79,7 @@ class PlanningFlow(BaseFlow):
         Get an appropriate executor agent for the current step.
         Can be extended to select agents based on step type/requirements.
         """
-        # 如果提供了步骤类型并与代理键匹配，使用该代理
+        # If step type is provided and matches an agent key, use that agent
         if step_type and step_type in self.agents:
             return self.agents[step_type]
 
@@ -88,7 +88,7 @@ class PlanningFlow(BaseFlow):
             if key in self.agents:
                 return self.agents[key]
 
-        # 回退to primary agent
+        # Fallback to primary agent
         return self.primary_agent
 
     async def execute(self, input_text: str) -> str:
@@ -97,11 +97,11 @@ class PlanningFlow(BaseFlow):
             if not self.primary_agent:
                 raise ValueError("No primary agent available")
 
-            # 创建initial plan if input provided
+            # Create initial plan if input provided
             if input_text:
                 await self._create_initial_plan(input_text)
 
-                # 验证plan was created successfully
+                # Verify plan was created successfully
                 if self.active_plan_id not in self.planning_tool.plans:
                     logger.error(
                         f"Plan creation failed. Plan ID {self.active_plan_id} not found in planning tool."
@@ -110,21 +110,21 @@ class PlanningFlow(BaseFlow):
 
             result = ""
             while True:
-                # 获取current step to execute
+                # Get current step to execute
                 self.current_step_index, step_info = await self._get_current_step_info()
 
-                # 如果没有更多步骤或计划完成，则退出
+                # Exit if no more steps or plan completed
                 if self.current_step_index is None:
                     result += await self._finalize_plan()
                     break
 
-                # 使用适当的代理执行当前步骤
+                # Execute current step with appropriate agent
                 step_type = step_info.get("type") if step_info else None
                 executor = self.get_executor(step_type)
                 step_result = await self._execute_step(executor, step_info)
                 result += step_result + "\n"
 
-                # 检查代理是否想要终止
+                # Check if agent wants to terminate
                 if hasattr(executor, "state") and executor.state == AgentState.FINISHED:
                     break
 
@@ -152,22 +152,22 @@ class PlanningFlow(BaseFlow):
                     }
                 )
         if len(agents_description) > 1:
-            # 添加要选择的代理的描述
+            # Add description of agents to select
             system_message_content += (
                 f"\nNow we have {agents_description} agents. "
                 f"The infomation of them are below: {json.dumps(agents_description)}\n"
                 "When creating steps in the planning tool, please specify the agent names using the format '[agent_name]'."
             )
 
-        # 创建a system message for plan creation
+        # Create a system message for plan creation
         system_message = Message.system_message(system_message_content)
 
-        # 创建a user message with the request
+        # Create a user message with the request
         user_message = Message.user_message(
             f"Create a reasonable plan with clear steps to accomplish the task: {request}"
         )
 
-        # 使用 PlanningTool 调用 LLM
+        # Call LLM with PlanningTool
         response = await self.llm.ask_tool(
             messages=[user_message],
             system_msgs=[system_message],
@@ -175,11 +175,11 @@ class PlanningFlow(BaseFlow):
             tool_choice=ToolChoice.AUTO,
         )
 
-        # 处理tool calls if present
+        # Process tool calls if present
         if response.tool_calls:
             for tool_call in response.tool_calls:
                 if tool_call.function.name == "planning":
-                    # 解析the arguments
+                    # Parse the arguments
                     args = tool_call.function.arguments
                     if isinstance(args, str):
                         try:
@@ -188,19 +188,19 @@ class PlanningFlow(BaseFlow):
                             logger.error(f"Failed to parse tool arguments: {args}")
                             continue
 
-                    # 确保plan_id is set correctly and execute the tool
+                    # Ensure plan_id is set correctly and execute the tool
                     args["plan_id"] = self.active_plan_id
 
-                    # 通过 ToolCollection 而不是直接执行工具
+                    # Execute the tool via ToolCollection instead of directly
                     result = await self.planning_tool.execute(**args)
 
                     logger.info(f"Plan creation result: {str(result)}")
                     return
 
-        # 如果执行到达这里，创建默认计划
+        # If execution reached here, create a default plan
         logger.warning("Creating default plan")
 
-        # 创建default plan using the ToolCollection
+        # Create default plan using the ToolCollection
         await self.planning_tool.execute(
             **{
                 "command": "create",
@@ -223,12 +223,12 @@ class PlanningFlow(BaseFlow):
             return None, None
 
         try:
-            # 直接访问规划工具存储中的计划数据
+            # Direct access to plan data from planning tool storage
             plan_data = self.planning_tool.plans[self.active_plan_id]
             steps = plan_data.get("steps", [])
             step_statuses = plan_data.get("step_statuses", [])
 
-            # 查找第一个未完成的步骤
+            # Find first non-completed step
             for i, step in enumerate(steps):
                 if i >= len(step_statuses):
                     status = PlanStepStatus.NOT_STARTED.value
@@ -236,7 +236,7 @@ class PlanningFlow(BaseFlow):
                     status = step_statuses[i]
 
                 if status in PlanStepStatus.get_active_statuses():
-                    # 提取step type/category if available
+                    # Extract step type/category if available
                     step_info = {"text": step}
 
                     # Try to extract step type from the text (e.g., [SEARCH] or [CODE])
@@ -256,7 +256,7 @@ class PlanningFlow(BaseFlow):
                         )
                     except Exception as e:
                         logger.warning(f"Error marking step as in_progress: {e}")
-                        # 更新step status directly if needed
+                        # Update step status directly if needed
                         if i < len(step_statuses):
                             step_statuses[i] = PlanStepStatus.IN_PROGRESS.value
                         else:
@@ -280,7 +280,7 @@ class PlanningFlow(BaseFlow):
         plan_status = await self._get_plan_text()
         step_text = step_info.get("text", f"Step {self.current_step_index}")
 
-        # 创建a prompt for the agent to execute the current step
+        # Create a prompt for the agent to execute the current step
         step_prompt = f"""
         CURRENT PLAN STATUS:
         {plan_status}
@@ -321,16 +321,16 @@ class PlanningFlow(BaseFlow):
             )
         except Exception as e:
             logger.warning(f"Failed to update plan status: {e}")
-            # 更新step status directly in planning tool storage
+            # Update step status directly in planning tool storage
             if self.active_plan_id in self.planning_tool.plans:
                 plan_data = self.planning_tool.plans[self.active_plan_id]
                 step_statuses = plan_data.get("step_statuses", [])
 
-                # 确保the step_statuses list is long enough
+                # Ensure the step_statuses list is long enough
                 while len(step_statuses) <= self.current_step_index:
                     step_statuses.append(PlanStepStatus.NOT_STARTED.value)
 
-                # 更新the status
+                # Update the status
                 step_statuses[self.current_step_index] = PlanStepStatus.COMPLETED.value
                 plan_data["step_statuses"] = step_statuses
 
@@ -357,13 +357,13 @@ class PlanningFlow(BaseFlow):
             step_statuses = plan_data.get("step_statuses", [])
             step_notes = plan_data.get("step_notes", [])
 
-            # 确保step_statuses and step_notes match the number of steps
+            # Ensure step_statuses and step_notes match the number of steps
             while len(step_statuses) < len(steps):
                 step_statuses.append(PlanStepStatus.NOT_STARTED.value)
             while len(step_notes) < len(steps):
                 step_notes.append("")
 
-            # 按状态计数步骤
+            # Count steps by status
             status_counts = {status: 0 for status in PlanStepStatus.get_all_statuses()}
 
             for status in step_statuses:
@@ -407,7 +407,7 @@ class PlanningFlow(BaseFlow):
         """Finalize the plan and provide a summary using the flow's LLM directly."""
         plan_text = await self._get_plan_text()
 
-        # 创建a summary using the flow's LLM directly
+        # Create a summary using the flow's LLM directly
         try:
             system_message = Message.system_message(
                 "You are a planning assistant. Your task is to summarize the completed plan."
@@ -425,7 +425,7 @@ class PlanningFlow(BaseFlow):
         except Exception as e:
             logger.error(f"Error finalizing plan with LLM: {e}")
 
-            # 回退到使用代理进行摘要
+            # Fallback to using an agent for the summary
             try:
                 agent = self.primary_agent
                 summary_prompt = f"""

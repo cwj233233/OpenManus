@@ -66,10 +66,10 @@ class DockerSandbox:
                 binds=self._prepare_volume_bindings(),
             )
 
-            # 生成unique container name with sandbox_ prefix
+            # Generate unique container name with sandbox_ prefix
             container_name = f"sandbox_{uuid.uuid4().hex[:8]}"
 
-            # 创建container
+            # Create container
             container = await asyncio.to_thread(
                 self.client.api.create_container,
                 image=self.config.image,
@@ -84,15 +84,15 @@ class DockerSandbox:
 
             self.container = self.client.containers.get(container["Id"])
 
-            # 启动container
+            # Start container
             await asyncio.to_thread(self.container.start)
 
-            # 初始化terminal
+            # Initialize terminal
             self.terminal = AsyncDockerizedTerminal(
                 container["Id"],
                 self.config.work_dir,
                 env_vars={"PYTHONUNBUFFERED": "1"}
-                # 确保Python output is not buffered
+                # Ensure Python output is not buffered
             )
             await self.terminal.init()
 
@@ -110,11 +110,11 @@ class DockerSandbox:
         """
         bindings = {}
 
-        # 创建and add working directory mapping
+        # Create and add working directory mapping
         work_dir = self._ensure_host_dir(self.config.work_dir)
         bindings[work_dir] = {"bind": self.config.work_dir, "mode": "rw"}
 
-        # 添加自定义卷绑定
+        # Add custom volume bindings
         for host_path, container_path in self.volume_bindings.items():
             bindings[host_path] = {"bind": container_path, "mode": "rw"}
 
@@ -180,7 +180,7 @@ class DockerSandbox:
             raise RuntimeError("Sandbox not initialized")
 
         try:
-            # 获取file archive
+            # Get file archive
             resolved_path = self._safe_resolve_path(path)
             tar_stream, _ = await asyncio.to_thread(
                 self.container.get_archive, resolved_path
@@ -212,7 +212,7 @@ class DockerSandbox:
             resolved_path = self._safe_resolve_path(path)
             parent_dir = os.path.dirname(resolved_path)
 
-            # 创建parent directory
+            # Create parent directory
             if parent_dir:
                 await self.run_command(f"mkdir -p {parent_dir}")
 
@@ -241,7 +241,7 @@ class DockerSandbox:
         Raises:
             ValueError: If path contains potentially unsafe patterns.
         """
-        # 检查路径遍历尝试
+        # Check for path traversal attempts
         if ".." in path.split("/"):
             raise ValueError("Path contains potentially unsafe patterns")
 
@@ -264,18 +264,18 @@ class DockerSandbox:
             RuntimeError: If copy operation fails.
         """
         try:
-            # 确保destination file's parent directory exists
+            # Ensure destination file's parent directory exists
             parent_dir = os.path.dirname(dst_path)
             if parent_dir:
                 os.makedirs(parent_dir, exist_ok=True)
 
-            # 获取file stream
+            # Get file stream
             resolved_src = self._safe_resolve_path(src_path)
             stream, stat = await asyncio.to_thread(
                 self.container.get_archive, resolved_src
             )
 
-            # 创建temporary directory to extract file
+            # Create temporary directory to extract file
             with tempfile.TemporaryDirectory() as tmp_dir:
                 # Write stream to temporary file
                 tar_path = os.path.join(tmp_dir, "temp.tar")
@@ -283,17 +283,17 @@ class DockerSandbox:
                     for chunk in stream:
                         f.write(chunk)
 
-                # 提取file
+                # Extract file
                 with tarfile.open(tar_path) as tar:
                     members = tar.getmembers()
                     if not members:
                         raise FileNotFoundError(f"Source file is empty: {src_path}")
 
-                    # 如果目标是目录，我们应该保留相对路径结构
+                    # If destination is a directory, we should preserve relative path structure
                     if os.path.isdir(dst_path):
                         tar.extractall(dst_path)
                     else:
-                        # 如果目标是文件，我们只提取源文件的内容
+                        # If destination is a file, we only extract the source file's content
                         if len(members) > 1:
                             raise RuntimeError(
                                 f"Source path is a directory but destination is a file: {src_path}"
@@ -327,17 +327,17 @@ class DockerSandbox:
             if not os.path.exists(src_path):
                 raise FileNotFoundError(f"Source file not found: {src_path}")
 
-            # 创建destination directory in container
+            # Create destination directory in container
             resolved_dst = self._safe_resolve_path(dst_path)
             container_dir = os.path.dirname(resolved_dst)
             if container_dir:
                 await self.run_command(f"mkdir -p {container_dir}")
 
-            # 创建tar file to upload
+            # Create tar file to upload
             with tempfile.TemporaryDirectory() as tmp_dir:
                 tar_path = os.path.join(tmp_dir, "temp.tar")
                 with tarfile.open(tar_path, "w") as tar:
-                    # 处理directory source path
+                    # Handle directory source path
                     if os.path.isdir(src_path):
                         os.path.basename(src_path.rstrip("/"))
                         for root, _, files in os.walk(src_path):
@@ -349,7 +349,7 @@ class DockerSandbox:
                                 )
                                 tar.add(file_path, arcname=arcname)
                     else:
-                        # 将单个文件添加到 tar
+                        # Add single file to tar
                         tar.add(src_path, arcname=os.path.basename(dst_path))
 
                 # Read tar file content
@@ -363,7 +363,7 @@ class DockerSandbox:
                     data,
                 )
 
-                # 验证file was created successfully
+                # Verify file was created successfully
                 try:
                     await self.run_command(f"test -e {resolved_dst}")
                 except Exception:

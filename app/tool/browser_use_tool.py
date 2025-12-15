@@ -126,7 +126,7 @@ class BrowserUseTool(BaseTool, Generic[Context]):
     dom_service: Optional[DomService] = Field(default=None, exclude=True)
     web_search_tool: WebSearch = Field(default_factory=WebSearch, exclude=True)
 
-    # 通用功能的上下文
+    # Context for generic functionality
     tool_context: Optional[Context] = Field(default=None, exclude=True)
 
     llm: Optional[LLM] = Field(default_factory=LLM)
@@ -145,7 +145,7 @@ class BrowserUseTool(BaseTool, Generic[Context]):
             if config.browser_config:
                 from browser_use.browser.browser import ProxySettings
 
-                # 处理代理设置
+                # handle proxy settings.
                 if config.browser_config.proxy and config.browser_config.proxy.server:
                     browser_config_kwargs["proxy"] = ProxySettings(
                         server=config.browser_config.proxy.server,
@@ -223,7 +223,7 @@ class BrowserUseTool(BaseTool, Generic[Context]):
             try:
                 context = await self._ensure_browser_initialized()
 
-                # 获取max content length from config
+                # Get max content length from config
                 max_content_length = getattr(
                     config.browser_config, "max_content_length", 2000
                 )
@@ -252,7 +252,7 @@ class BrowserUseTool(BaseTool, Generic[Context]):
                         return ToolResult(
                             error="Query is required for 'web_search' action"
                         )
-                    # 执行网络搜索并直接返回结果，无需浏览器导航
+                    # Execute the web search and return results directly without browser navigation
                     search_response = await self.web_search_tool.execute(
                         query=query, fetch_content=True, num_results=1
                     )
@@ -266,7 +266,7 @@ class BrowserUseTool(BaseTool, Generic[Context]):
 
                     return search_response
 
-                # 元素交互操作
+                # Element interaction actions
                 elif action == "click_element":
                     if index is None:
                         return ToolResult(
@@ -391,7 +391,7 @@ Page content:
 """
                     messages = [{"role": "system", "content": prompt}]
 
-                    # 定义提取函数架构
+                    # Define extraction function schema
                     extraction_function = {
                         "type": "function",
                         "function": {
@@ -490,7 +490,7 @@ Page content:
 
             state = await ctx.get_state()
 
-            # 创建a viewport_info dictionary if it doesn't exist
+            # Create a viewport_info dictionary if it doesn't exist
             viewport_height = 0
             if hasattr(state, "viewport_info") and state.viewport_info:
                 viewport_height = state.viewport_info.height
@@ -509,7 +509,7 @@ Page content:
 
             screenshot = base64.b64encode(screenshot).decode("utf-8")
 
-            # 使用所有必需字段构建状态信息
+            # Build the state info with all required fields
             state_info = {
                 "url": state.url,
                 "title": state.title,

@@ -87,7 +87,7 @@ class Crawl4aiTool(BaseTool):
         else:
             url_list = urls
 
-        # 验证URLs
+        # Validate URLs
         valid_urls = []
         for url in url_list:
             if self._is_valid_url(url):
@@ -99,7 +99,7 @@ class Crawl4aiTool(BaseTool):
             return ToolResult(error="No valid URLs provided")
 
         try:
-            # 导入 crawl4ai 组件
+            # Import crawl4ai components
             from crawl4ai import (
                 AsyncWebCrawler,
                 BrowserConfig,
@@ -107,7 +107,7 @@ class Crawl4aiTool(BaseTool):
                 CrawlerRunConfig,
             )
 
-            # 配置浏览器设置
+            # Configure browser settings
             browser_config = BrowserConfig(
                 headless=True,
                 verbose=False,
@@ -116,7 +116,7 @@ class Crawl4aiTool(BaseTool):
                 java_script_enabled=True,
             )
 
-            # 配置爬虫设置
+            # Configure crawler settings
             run_config = CrawlerRunConfig(
                 cache_mode=CacheMode.BYPASS if bypass_cache else CacheMode.ENABLED,
                 word_count_threshold=word_count_threshold,
@@ -132,7 +132,7 @@ class Crawl4aiTool(BaseTool):
             successful_count = 0
             failed_count = 0
 
-            # 处理each URL
+            # Process each URL
             async with AsyncWebCrawler(config=browser_config) as crawler:
                 for url in valid_urls:
                     try:
@@ -145,19 +145,19 @@ class Crawl4aiTool(BaseTool):
                         execution_time = end_time - start_time
 
                         if result.success:
-                            # 计数 markdown 中的单词
+                            # Count words in markdown
                             word_count = 0
                             if hasattr(result, "markdown") and result.markdown:
                                 word_count = len(result.markdown.split())
 
-                            # 计数链接
+                            # Count links
                             links_count = 0
                             if hasattr(result, "links") and result.links:
                                 internal_links = result.links.get("internal", [])
                                 external_links = result.links.get("external", [])
                                 links_count = len(internal_links) + len(external_links)
 
-                            # 计数图像
+                            # Count images
                             images_count = 0
                             if hasattr(result, "media") and result.media:
                                 images = result.media.get("images", [])
@@ -211,7 +211,7 @@ class Crawl4aiTool(BaseTool):
                         )
                         failed_count += 1
 
-            # 格式化output
+            # Format output
             output_lines = [f"🕷️ Crawl4AI Results Summary:"]
             output_lines.append(f"📊 Total URLs: {len(valid_urls)}")
             output_lines.append(f"✅ Successful: {successful_count}")

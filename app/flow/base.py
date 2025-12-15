@@ -19,7 +19,7 @@ class BaseFlow(BaseModel, ABC):
     def __init__(
         self, agents: Union[BaseAgent, List[BaseAgent], Dict[str, BaseAgent]], **data
     ):
-        # 处理different ways of providing agents
+        # Handle different ways of providing agents
         if isinstance(agents, BaseAgent):
             agents_dict = {"default": agents}
         elif isinstance(agents, list):
@@ -27,16 +27,16 @@ class BaseFlow(BaseModel, ABC):
         else:
             agents_dict = agents
 
-        # 如果未指定主代理，使用第一个代理
+        # If primary agent not specified, use first agent
         primary_key = data.get("primary_agent_key")
         if not primary_key and agents_dict:
             primary_key = next(iter(agents_dict))
             data["primary_agent_key"] = primary_key
 
-        # 设置the agents dictionary
+        # Set the agents dictionary
         data["agents"] = agents_dict
 
-        # 初始化using BaseModel's init
+        # Initialize using BaseModel's init
         super().__init__(**data)
 
     @property

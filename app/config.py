@@ -248,12 +248,12 @@ class Config:
             "api_version": base_llm.get("api_version", ""),
         }
 
-        # 处理浏览器配置
+        # handle browser config.
         browser_config = raw_config.get("browser", {})
         browser_settings = None
 
         if browser_config:
-            # 处理代理设置
+            # handle proxy settings.
             proxy_config = browser_config.get("proxy", {})
             proxy_settings = None
 
@@ -266,7 +266,7 @@ class Config:
                     }
                 )
 
-            # 过滤有效的浏览器配置参数
+            # filter valid browser config parameters.
             valid_browser_params = {
                 k: v
                 for k, v in browser_config.items()
@@ -299,7 +299,7 @@ class Config:
         mcp_config = raw_config.get("mcp", {})
         mcp_settings = None
         if mcp_config:
-            # 加载server configurations from JSON
+            # Load server configurations from JSON
             mcp_config["servers"] = MCPSettings.load_server_config()
             mcp_settings = MCPSettings(**mcp_config)
         else:

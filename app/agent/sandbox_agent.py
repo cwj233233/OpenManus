@@ -33,7 +33,7 @@ class SandboxManus(ToolCallAgent):
     # MCP clients for remote tool access
     mcp_clients: MCPClients = Field(default_factory=MCPClients)
 
-    # 将通用工具添加到工具集合
+    # Add general-purpose tools to the tool collection
     available_tools: ToolCollection = Field(
         default_factory=lambda: ToolCollection(
             # PythonExecute(),
@@ -87,7 +87,7 @@ class SandboxManus(ToolCallAgent):
                 website_link.url if hasattr(website_link, "url") else str(website_link)
             )
 
-            # 获取the actual sandbox_id from the created sandbox
+            # Get the actual sandbox_id from the created sandbox
             actual_sandbox_id = sandbox.id if hasattr(sandbox, "id") else "new_sandbox"
             if not self.sandbox_link:
                 self.sandbox_link = {}
@@ -151,7 +151,7 @@ class SandboxManus(ToolCallAgent):
             await self.mcp_clients.connect_sse(server_url, server_id)
             self.connected_servers[server_id or server_url] = server_url
 
-        # 更新available tools with only the new tools from this server
+        # Update available tools with only the new tools from this server
         new_tools = [
             tool for tool in self.mcp_clients.tools if tool.server_id == server_id
         ]
@@ -189,7 +189,7 @@ class SandboxManus(ToolCallAgent):
         """Clean up Manus agent resources."""
         if self.browser_context_helper:
             await self.browser_context_helper.cleanup_browser()
-        # 断开连接from all MCP servers only if we were initialized
+        # Disconnect from all MCP servers only if we were initialized
         if self._initialized:
             await self.disconnect_mcp_server()
             await self.delete_sandbox(self.sandbox.id if self.sandbox else "unknown")

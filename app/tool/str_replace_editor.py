@@ -23,7 +23,7 @@ Command = Literal[
     "undo_edit",
 ]
 
-# 常量
+# Constants
 SNIPPET_LINES: int = 4
 MAX_RESPONSE_LEN: int = 16000
 TRUNCATED_MESSAGE: str = (
@@ -123,13 +123,13 @@ class StrReplaceEditor(BaseTool):
         **kwargs: Any,
     ) -> str:
         """Execute a file operation command."""
-        # 获取the appropriate file operator
+        # Get the appropriate file operator
         operator = self._get_operator()
 
-        # 验证path and command combination
+        # Validate path and command combination
         await self.validate_path(command, Path(path), operator)
 
-        # 执行适当的命令
+        # Execute the appropriate command
         if command == "view":
             result = await self.view(path, view_range, operator)
         elif command == "create":
@@ -166,7 +166,7 @@ class StrReplaceEditor(BaseTool):
         self, command: str, path: Path, operator: FileOperator
     ) -> None:
         """Validate path and command combination based on execution environment."""
-        # 检查路径是否为绝对路径
+        # Check if path is absolute
         if not path.is_absolute():
             raise ToolError(f"The path {path} is not an absolute path")
 
@@ -177,14 +177,14 @@ class StrReplaceEditor(BaseTool):
                     f"The path {path} does not exist. Please provide a valid path."
                 )
 
-            # 检查路径是否为目录
+            # Check if path is a directory
             is_dir = await operator.is_directory(path)
             if is_dir and command != "view":
                 raise ToolError(
                     f"The path {path} is a directory and only the `view` command can be used on directories"
                 )
 
-        # 检查文件是否存在以创建命令
+        # Check if file exists for create command
         elif command == "create":
             exists = await operator.exists(path)
             if exists:
@@ -199,11 +199,11 @@ class StrReplaceEditor(BaseTool):
         operator: FileOperator = None,
     ) -> CLIResult:
         """Display file or directory content."""
-        # 确定路径是否为目录
+        # Determine if path is a directory
         is_dir = await operator.is_directory(path)
 
         if is_dir:
-            # 目录处理
+            # Directory handling
             if view_range:
                 raise ToolError(
                     "The `view_range` parameter is not allowed when `path` points to a directory."
@@ -211,7 +211,7 @@ class StrReplaceEditor(BaseTool):
 
             return await self._view_directory(path, operator)
         else:
-            # 文件处理
+            # File handling
             return await self._view_file(path, operator, view_range)
 
     @staticmethod
@@ -219,7 +219,7 @@ class StrReplaceEditor(BaseTool):
         """Display directory contents."""
         find_cmd = f"find {path} -maxdepth 2 -not -path '*/\\.*'"
 
-        # 使用操作符执行命令
+        # Execute command using the operator
         returncode, stdout, stderr = await operator.run_command(find_cmd)
 
         if not stderr:
@@ -241,7 +241,7 @@ class StrReplaceEditor(BaseTool):
         file_content = await operator.read_file(path)
         init_line = 1
 
-        # 如果指定，应用视图范围
+        # Apply view range if specified
         if view_range:
             if len(view_range) != 2 or not all(isinstance(i, int) for i in view_range):
                 raise ToolError(
@@ -252,7 +252,7 @@ class StrReplaceEditor(BaseTool):
             n_lines_file = len(file_lines)
             init_line, final_line = view_range
 
-            # 验证view range
+            # Validate view range
             if init_line < 1 or init_line > n_lines_file:
                 raise ToolError(
                     f"Invalid `view_range`: {view_range}. Its first element `{init_line}` should be "
@@ -269,13 +269,13 @@ class StrReplaceEditor(BaseTool):
                     f"larger or equal than its first `{init_line}`"
                 )
 
-            # 应用范围
+            # Apply range
             if final_line == -1:
                 file_content = "\n".join(file_lines[init_line - 1 :])
             else:
                 file_content = "\n".join(file_lines[init_line - 1 : final_line])
 
-        # 格式化and return result
+        # Format and return result
         return CLIResult(
             output=self._make_output(file_content, str(path), init_line=init_line)
         )
@@ -293,7 +293,7 @@ class StrReplaceEditor(BaseTool):
         old_str = old_str.expandtabs()
         new_str = new_str.expandtabs() if new_str is not None else ""
 
-        # 检查 old_str 在文件中是否唯一
+        # Check if old_str is unique in the file
         occurrences = file_content.count(old_str)
         if occurrences == 0:
             raise ToolError(
@@ -318,10 +318,10 @@ class StrReplaceEditor(BaseTool):
         # Write the new content to the file
         await operator.write_file(path, new_file_content)
 
-        # 保存the original content to history
+        # Save the original content to history
         self._file_history[path].append(file_content)
 
-        # 创建a snippet of the edited section
+        # Create a snippet of the edited section
         replacement_line = file_content.split(old_str)[0].count("\n")
         start_line = max(0, replacement_line - SNIPPET_LINES)
         end_line = replacement_line + SNIPPET_LINES + new_str.count("\n")
@@ -350,7 +350,7 @@ class StrReplaceEditor(BaseTool):
         file_text_lines = file_text.split("\n")
         n_lines_file = len(file_text_lines)
 
-        # 验证insert_line
+        # Validate insert_line
         if insert_line < 0 or insert_line > n_lines_file:
             raise ToolError(
                 f"Invalid `insert_line` parameter: {insert_line}. It should be within "
@@ -365,14 +365,14 @@ class StrReplaceEditor(BaseTool):
             + file_text_lines[insert_line:]
         )
 
-        # 创建a snippet for preview
+        # Create a snippet for preview
         snippet_lines = (
             file_text_lines[max(0, insert_line - SNIPPET_LINES) : insert_line]
             + new_str_lines
             + file_text_lines[insert_line : insert_line + SNIPPET_LINES]
         )
 
-        # 连接lines and write to file
+        # Join lines and write to file
         new_file_text = "\n".join(new_file_text_lines)
         snippet = "\n".join(snippet_lines)
 
@@ -416,7 +416,7 @@ class StrReplaceEditor(BaseTool):
         if expand_tabs:
             file_content = file_content.expandtabs()
 
-        # 为每一行添加行号
+        # Add line numbers to each line
         file_content = "\n".join(
             [
                 f"{i + init_line:6}\t{line}"

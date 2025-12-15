@@ -1,7 +1,7 @@
 import os
 
 
-# 要从操作中排除的文件
+# Files to exclude from operations
 EXCLUDED_FILES = {
     ".DS_Store",
     ".gitignore",
@@ -14,10 +14,10 @@ EXCLUDED_FILES = {
     "tsconfig.json",
 }
 
-# 要从操作中排除的目录
+# Directories to exclude from operations
 EXCLUDED_DIRS = {"node_modules", ".next", "dist", "build", ".git"}
 
-# 要从操作中排除的文件扩展名
+# File extensions to exclude from operations
 EXCLUDED_EXT = {
     ".ico",
     ".svg",
@@ -42,17 +42,17 @@ def should_exclude_file(rel_path: str) -> bool:
     Returns:
         True if the file should be excluded, False otherwise
     """
-    # 检查文件名
+    # Check filename
     filename = os.path.basename(rel_path)
     if filename in EXCLUDED_FILES:
         return True
 
-    # 检查目录
+    # Check directory
     dir_path = os.path.dirname(rel_path)
     if any(excluded in dir_path for excluded in EXCLUDED_DIRS):
         return True
 
-    # 检查扩展名
+    # Check extension
     _, ext = os.path.splitext(filename)
     if ext.lower() in EXCLUDED_EXT:
         return True
@@ -70,18 +70,18 @@ def clean_path(path: str, workspace_path: str = "/workspace") -> str:
     Returns:
         The cleaned path, relative to the workspace
     """
-    # 移除any leading slash
+    # Remove any leading slash
     path = path.lstrip("/")
 
-    # 移除workspace prefix if present
+    # Remove workspace prefix if present
     if path.startswith(workspace_path.lstrip("/")):
         path = path[len(workspace_path.lstrip("/")) :]
 
-    # 移除workspace/ prefix if present
+    # Remove workspace/ prefix if present
     if path.startswith("workspace/"):
         path = path[9:]
 
-    # 移除any remaining leading slash
+    # Remove any remaining leading slash
     path = path.lstrip("/")
 
     return path

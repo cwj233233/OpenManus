@@ -3,7 +3,6 @@ import os
 from typing import Optional
 
 from app.exceptions import ToolError
-from app.logger import logger
 from app.tool.base import BaseTool, CLIResult
 
 _BASH_DESCRIPTION = """在终端中执行 bash 命令。
@@ -69,29 +68,29 @@ class _BashSession:
                 f"timed out: bash has not returned in {self._timeout} seconds and must be restarted",
             )
 
-        # 我们知道这些不是 None，因为我们用 PIPE 创建了进程
+        # we know these are not None because we created the process with PIPEs
         assert self._process.stdin
         assert self._process.stdout
         assert self._process.stderr
 
-        # 向进程发送命令
+        # send command to the process
         self._process.stdin.write(
             command.encode() + f"; echo '{self._sentinel}'\n".encode()
         )
         await self._process.stdin.drain()
 
-        # 从进程读取输出，直到找到哨兵
+        # read output from the process, until the sentinel is found
         try:
             async with asyncio.timeout(self._timeout):
                 while True:
                     await asyncio.sleep(self._output_delay)
-                    # 如果我们直接从 stdout/stderr 读取，它会永远等待
-                    # EOF。改为直接使用 StreamReader 缓冲区
+                    # if we read directly from stdout/stderr, it will wait forever for
+                    # EOF. use the StreamReader buffer directly instead.
                     output = (
                         self._process.stdout._buffer.decode()
                     )  # pyright: ignore[reportAttributeAccessIssue]
                     if self._sentinel in output:
-                        # 去掉哨兵并中断
+                        # strip the sentinel and break
                         output = output[: output.index(self._sentinel)]
                         break
         except asyncio.TimeoutError:
@@ -109,7 +108,7 @@ class _BashSession:
         if error.endswith("\n"):
             error = error[:-1]
 
-        # 清除缓冲区，以便正确读取下一个输出
+        # clear the buffers so that the next output can be read correctly
         self._process.stdout._buffer.clear()  # pyright: ignore[reportAttributeAccessIssue]
         self._process.stderr._buffer.clear()  # pyright: ignore[reportAttributeAccessIssue]
 

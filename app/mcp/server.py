@@ -28,7 +28,7 @@ class MCPServer:
         self.server = FastMCP(name)
         self.tools: Dict[str, BaseTool] = {}
 
-        # 初始化standard tools
+        # Initialize standard tools
         self.tools["bash"] = Bash()
         self.tools["browser"] = BrowserUseTool()
         self.tools["editor"] = StrReplaceEditor()
@@ -40,26 +40,26 @@ class MCPServer:
         tool_param = tool.to_param()
         tool_function = tool_param["function"]
 
-        # 定义要注册的异步函数
+        # Define the async function to be registered
         async def tool_method(**kwargs):
             logger.info(f"Executing {tool_name}: {kwargs}")
             result = await tool.execute(**kwargs)
 
             logger.info(f"Result of {tool_name}: {result}")
 
-            # 处理different types of results (match original logic)
+            # Handle different types of results (match original logic)
             if hasattr(result, "model_dump"):
                 return json.dumps(result.model_dump())
             elif isinstance(result, dict):
                 return json.dumps(result)
             return result
 
-        # 设置method metadata
+        # Set method metadata
         tool_method.__name__ = tool_name
         tool_method.__doc__ = self._build_docstring(tool_function)
         tool_method.__signature__ = self._build_signature(tool_function)
 
-        # 存储parameter schema (important for tools that access it programmatically)
+        # Store parameter schema (important for tools that access it programmatically)
         param_props = tool_function.get("parameters", {}).get("properties", {})
         required_params = tool_function.get("parameters", {}).get("required", [])
         tool_method._parameter_schema = {
@@ -81,7 +81,7 @@ class MCPServer:
         param_props = tool_function.get("parameters", {}).get("properties", {})
         required_params = tool_function.get("parameters", {}).get("required", [])
 
-        # 构建文档字符串（匹配原始格式）
+        # Build docstring (match original format)
         docstring = description
         if param_props:
             docstring += "\n\nParameters:\n"
@@ -104,7 +104,7 @@ class MCPServer:
 
         parameters = []
 
-        # 遵循原始类型映射
+        # Follow original type mapping
         for param_name, param_details in param_props.items():
             param_type = param_details.get("type", "")
             default = Parameter.empty if param_name in required_params else None
@@ -124,7 +124,7 @@ class MCPServer:
             elif param_type == "array":
                 annotation = list
 
-            # 创建parameter with same structure as original
+            # Create parameter with same structure as original
             param = Parameter(
                 name=param_name,
                 kind=Parameter.KEYWORD_ONLY,
@@ -155,7 +155,7 @@ class MCPServer:
         # Register cleanup function (match original behavior)
         atexit.register(lambda: asyncio.run(self.cleanup()))
 
-        # 启动server (with same logging as original)
+        # Start server (with same logging as original)
         logger.info(f"Starting OpenManus server ({transport} mode)")
         self.server.run(transport=transport)
 
@@ -175,6 +175,6 @@ def parse_args() -> argparse.Namespace:
 if __name__ == "__main__":
     args = parse_args()
 
-    # 创建and run server (maintaining original flow)
+    # Create and run server (maintaining original flow)
     server = MCPServer()
     server.run(transport=args.transport)

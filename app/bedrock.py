@@ -8,12 +8,12 @@ from typing import Dict, List, Literal, Optional
 import boto3
 
 
-# 全局变量，用于跟踪函数调用中的当前工具使用 ID
+# Global variables to track the current tool use ID across function calls
 # Tmp solution
 CURRENT_TOOLUSE_ID = None
 
 
-# 处理 OpenAI 风格响应格式的类
+# Class to handle OpenAI-style response formatting
 class OpenAIResponse:
     def __init__(self, data):
         # Recursively convert nested dicts and lists to OpenAIResponse objects
@@ -28,7 +28,7 @@ class OpenAIResponse:
             setattr(self, key, value)
 
     def model_dump(self, *args, **kwargs):
-        # 转换object to dict and add timestamp
+        # Convert object to dict and add timestamp
         data = self.__dict__
         data["created_at"] = datetime.now().isoformat()
         return data
@@ -37,7 +37,7 @@ class OpenAIResponse:
 # Main client class for interacting with Amazon Bedrock
 class BedrockClient:
     def __init__(self):
-        # 初始化 Bedrock 客户端，您需要先配置 AWS 环境
+        # Initialize Bedrock client, you need to configure AWS env first
         try:
             self.client = boto3.client("bedrock-runtime")
             self.chat = Chat(self.client)
@@ -46,19 +46,19 @@ class BedrockClient:
             sys.exit(1)
 
 
-# 聊天界面类
+# Chat interface class
 class Chat:
     def __init__(self, client):
         self.completions = ChatCompletions(client)
 
 
-# 处理聊天完成功能的核心类
+# Core class handling chat completions functionality
 class ChatCompletions:
     def __init__(self, client):
         self.client = client
 
     def _convert_openai_tools_to_bedrock_format(self, tools):
-        # 转换OpenAI function calling format to Bedrock tool format
+        # Convert OpenAI function calling format to Bedrock tool format
         bedrock_tools = []
         for tool in tools:
             if tool.get("type") == "function":
@@ -84,7 +84,7 @@ class ChatCompletions:
         return bedrock_tools
 
     def _convert_openai_messages_to_bedrock_format(self, messages):
-        # 转换OpenAI message format to Bedrock message format
+        # Convert OpenAI message format to Bedrock message format
         bedrock_messages = []
         system_prompt = []
         for message in messages:
@@ -132,7 +132,7 @@ class ChatCompletions:
         return system_prompt, bedrock_messages
 
     def _convert_bedrock_response_to_openai_format(self, bedrock_response):
-        # 转换Bedrock response format to OpenAI format
+        # Convert Bedrock response format to OpenAI format
         content = ""
         if bedrock_response.get("output", {}).get("message", {}).get("content"):
             content_array = bedrock_response["output"]["message"]["content"]
@@ -140,7 +140,7 @@ class ChatCompletions:
         if content == "":
             content = "."
 
-        # 处理tool calls in response
+        # Handle tool calls in response
         openai_tool_calls = []
         if bedrock_response.get("output", {}).get("message", {}).get("content"):
             for content_item in bedrock_response["output"]["message"]["content"]:
@@ -240,7 +240,7 @@ class ChatCompletions:
             toolConfig={"tools": tools} if tools else None,
         )
 
-        # 初始化response structure
+        # Initialize response structure
         bedrock_response = {
             "output": {"message": {"role": "", "content": []}},
             "stopReason": "",
@@ -250,7 +250,7 @@ class ChatCompletions:
         bedrock_response_text = ""
         bedrock_response_tool_input = ""
 
-        # 处理streaming response
+        # Process streaming response
         stream = response.get("stream")
         if stream:
             for event in stream:

@@ -26,7 +26,7 @@ class DataAnalysis(ToolCallAgent):
     max_observe: int = 15000
     max_steps: int = 20
 
-    # 将通用工具添加到工具集合
+    # Add general-purpose tools to the tool collection
     available_tools: ToolCollection = Field(
         default_factory=lambda: ToolCollection(
             NormalPythonExecute(),

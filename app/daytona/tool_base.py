@@ -50,7 +50,7 @@ class ThreadMessage:
 class SandboxToolsBase(BaseTool):
     """Base class for all sandbox tools that provides project-based sandbox access."""
 
-    # 类变量，用于跟踪沙箱 URL 是否已打印
+    # Class variable to track if sandbox URLs have been printed
     _urls_printed: ClassVar[bool] = False
 
     # Required fields
@@ -71,7 +71,7 @@ class SandboxToolsBase(BaseTool):
     async def _ensure_sandbox(self) -> Sandbox:
         """Ensure we have a valid sandbox instance, retrieving it from the project if needed."""
         if self._sandbox is None:
-            # 获取or start the sandbox
+            # Get or start the sandbox
             try:
                 self._sandbox = create_sandbox(password=config.daytona.VNC_password)
                 # Log URLs if not already printed
@@ -108,7 +108,7 @@ class SandboxToolsBase(BaseTool):
                     # sleep(5)
                     # Refresh sandbox state after starting
 
-                    # 启动supervisord in a session when restarting
+                    # Start supervisord in a session when restarting
                     start_supervisord_session(self._sandbox)
                 except Exception as e:
                     logger.error(f"Error starting sandbox: {e}")

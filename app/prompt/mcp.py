@@ -25,7 +25,7 @@ NEXT_STEP_PROMPT = """基于当前状态和可用工具，下一步应该做什�
 如果你已经取得进展，请考虑还需要哪些信息，或哪些动作能让你更接近完成任务。
 """
 
-# 额外的专门提示
+# Additional specialized prompts
 TOOL_ERROR_PROMPT = """你在使用工具 '{tool_name}' 时遇到了错误。
 请先理解问题出在哪里，并修正你的用法。
 常见原因包括：

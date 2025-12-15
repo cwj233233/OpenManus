@@ -23,7 +23,7 @@ class MCPAgent(ToolCallAgent):
     system_prompt: str = SYSTEM_PROMPT
     next_step_prompt: str = NEXT_STEP_PROMPT
 
-    # 初始化MCP tool collection
+    # Initialize MCP tool collection
     mcp_clients: MCPClients = Field(default_factory=MCPClients)
     available_tools: MCPClients = None  # Will be set in initialize()
 
@@ -55,7 +55,7 @@ class MCPAgent(ToolCallAgent):
         if connection_type:
             self.connection_type = connection_type
 
-        # 连接to the MCP server based on connection type
+        # Connect to the MCP server based on connection type
         if self.connection_type == "sse":
             if not server_url:
                 raise ValueError("Server URL is required for SSE connection")
@@ -67,17 +67,17 @@ class MCPAgent(ToolCallAgent):
         else:
             raise ValueError(f"Unsupported connection type: {self.connection_type}")
 
-        # 设置available_tools to our MCP instance
+        # Set available_tools to our MCP instance
         self.available_tools = self.mcp_clients
 
-        # 存储initial tool schemas
+        # Store initial tool schemas
         await self._refresh_tools()
 
-        # 添加关于可用工具的系统消息
+        # Add system message about available tools
         tool_names = list(self.mcp_clients.tool_map.keys())
         tools_info = ", ".join(tool_names)
 
-        # 添加系统提示和可用工具信息
+        # Add system prompt and available tools information
         self.memory.add_message(
             Message.system_message(
                 f"{self.system_prompt}\n\nAvailable MCP tools: {tools_info}"
@@ -93,24 +93,24 @@ class MCPAgent(ToolCallAgent):
         if not self.mcp_clients.sessions:
             return [], []
 
-        # 获取current tool schemas directly from the server
+        # Get current tool schemas directly from the server
         response = await self.mcp_clients.list_tools()
         current_tools = {tool.name: tool.inputSchema for tool in response.tools}
 
-        # 确定添加、删除和更改的工具
+        # Determine added, removed, and changed tools
         current_names = set(current_tools.keys())
         previous_names = set(self.tool_schemas.keys())
 
         added_tools = list(current_names - previous_names)
         removed_tools = list(previous_names - current_names)
 
-        # 检查现有工具中的架构更改
+        # Check for schema changes in existing tools
         changed_tools = []
         for name in current_names.intersection(previous_names):
             if current_tools[name] != self.tool_schemas.get(name):
                 changed_tools.append(name)
 
-        # 更新stored schemas
+        # Update stored schemas
         self.tool_schemas = current_tools
 
         # Log and notify about changes
@@ -133,7 +133,7 @@ class MCPAgent(ToolCallAgent):
 
     async def think(self) -> bool:
         """Process current state and decide next action."""
-        # 检查 MCP 会话和工具可用性
+        # Check MCP session and tools availability
         if not self.mcp_clients.sessions or not self.mcp_clients.tool_map:
             logger.info("MCP service is no longer available, ending interaction")
             self.state = AgentState.FINISHED
@@ -142,7 +142,7 @@ class MCPAgent(ToolCallAgent):
         # Refresh tools periodically
         if self.current_step % self._refresh_tools_interval == 0:
             await self._refresh_tools()
-            # 所有工具都被移除表示关闭
+            # All tools removed indicates shutdown
             if not self.mcp_clients.tool_map:
                 logger.info("MCP service has shut down, ending interaction")
                 self.state = AgentState.FINISHED
@@ -156,7 +156,7 @@ class MCPAgent(ToolCallAgent):
         # First process with parent handler
         await super()._handle_special_tool(name, result, **kwargs)
 
-        # 处理multimedia responses
+        # Handle multimedia responses
         if isinstance(result, ToolResult) and result.base64_image:
             self.memory.add_message(
                 Message.system_message(
@@ -181,5 +181,5 @@ class MCPAgent(ToolCallAgent):
             result = await super().run(request)
             return result
         finally:
-            # 确保cleanup happens even if there's an error
+            # Ensure cleanup happens even if there's an error
             await self.cleanup()

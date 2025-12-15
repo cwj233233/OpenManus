@@ -106,10 +106,10 @@ class SandboxShellTool(SandboxToolsBase):
 
     async def _execute_raw_command(self, command: str) -> Dict[str, Any]:
         """Execute a raw command directly in the sandbox."""
-        # 确保session exists for raw commands
+        # Ensure session exists for raw commands
         session_id = await self._ensure_session("raw_commands")
 
-        # 在会话中执行命令
+        # Execute command in session
         from app.daytona.sandbox import SessionExecuteRequest
 
         req = SessionExecuteRequest(
@@ -137,61 +137,61 @@ class SandboxShellTool(SandboxToolsBase):
         timeout: int = 60,
     ) -> ToolResult:
         try:
-            # 确保sandbox is initialized
+            # Ensure sandbox is initialized
             await self._ensure_sandbox()
 
-            # 设置up working directory
+            # Set up working directory
             cwd = self.workspace_path
             if folder:
                 folder = folder.strip("/")
                 cwd = f"{self.workspace_path}/{folder}"
 
-            # 生成a session name if not provided
+            # Generate a session name if not provided
             if not session_name:
                 session_name = f"session_{str(uuid4())[:8]}"
 
-            # 检查是否tmux session already exists
+            # Check if tmux session already exists
             check_session = await self._execute_raw_command(
                 f"tmux has-session -t {session_name} 2>/dev/null || echo 'not_exists'"
             )
             session_exists = "not_exists" not in check_session.get("output", "")
 
             if not session_exists:
-                # 创建a new tmux session
+                # Create a new tmux session
                 await self._execute_raw_command(
                     f"tmux new-session -d -s {session_name}"
                 )
 
-            # 确保we're in the correct directory and send command to tmux
+            # Ensure we're in the correct directory and send command to tmux
             full_command = f"cd {cwd} && {command}"
             wrapped_command = full_command.replace('"', '\\"')  # Escape double quotes
 
-            # 发送command to tmux session
+            # Send command to tmux session
             await self._execute_raw_command(
                 f'tmux send-keys -t {session_name} "{wrapped_command}" Enter'
             )
 
             if blocking:
-                # 对于阻塞执行，等待并捕获输出
+                # For blocking execution, wait and capture output
                 start_time = time.time()
                 while (time.time() - start_time) < timeout:
                     # Wait a bit before checking
                     time.sleep(2)
 
-                    # 检查是否session still exists (command might have exited)
+                    # Check if session still exists (command might have exited)
                     check_result = await self._execute_raw_command(
                         f"tmux has-session -t {session_name} 2>/dev/null || echo 'ended'"
                     )
                     if "ended" in check_result.get("output", ""):
                         break
 
-                    # 获取current output and check for common completion indicators
+                    # Get current output and check for common completion indicators
                     output_result = await self._execute_raw_command(
                         f"tmux capture-pane -t {session_name} -p -S - -E -"
                     )
                     current_output = output_result.get("output", "")
 
-                    # 检查表示命令完成的提示指示符
+                    # Check for prompt indicators that suggest command completion
                     last_lines = current_output.split("\n")[-3:]
                     completion_indicators = [
                         "$",
@@ -209,7 +209,7 @@ class SandboxShellTool(SandboxToolsBase):
                     ):
                         break
 
-                # 捕获最终输出
+                # Capture final output
                 output_result = await self._execute_raw_command(
                     f"tmux capture-pane -t {session_name} -p -S - -E -"
                 )
@@ -227,7 +227,7 @@ class SandboxShellTool(SandboxToolsBase):
                     }
                 )
             else:
-                # 对于非阻塞，立即返回
+                # For non-blocking, just return immediately
                 return self.success_response(
                     {
                         "session_name": session_name,
@@ -238,7 +238,7 @@ class SandboxShellTool(SandboxToolsBase):
                 )
 
         except Exception as e:
-            # 尝试在出错时清理会话
+            # Attempt to clean up session in case of error
             if session_name:
                 try:
                     await self._execute_raw_command(
@@ -252,10 +252,10 @@ class SandboxShellTool(SandboxToolsBase):
         self, session_name: str, kill_session: bool = False
     ) -> ToolResult:
         try:
-            # 确保sandbox is initialized
+            # Ensure sandbox is initialized
             await self._ensure_sandbox()
 
-            # 检查是否session exists
+            # Check if session exists
             check_result = await self._execute_raw_command(
                 f"tmux has-session -t {session_name} 2>/dev/null || echo 'not_exists'"
             )
@@ -264,7 +264,7 @@ class SandboxShellTool(SandboxToolsBase):
                     f"Tmux session '{session_name}' does not exist."
                 )
 
-            # 获取output from tmux pane
+            # Get output from tmux pane
             output_result = await self._execute_raw_command(
                 f"tmux capture-pane -t {session_name} -p -S - -E -"
             )
@@ -290,10 +290,10 @@ class SandboxShellTool(SandboxToolsBase):
 
     async def _terminate_command(self, session_name: str) -> ToolResult:
         try:
-            # 确保sandbox is initialized
+            # Ensure sandbox is initialized
             await self._ensure_sandbox()
 
-            # 检查是否session exists
+            # Check if session exists
             check_result = await self._execute_raw_command(
                 f"tmux has-session -t {session_name} 2>/dev/null || echo 'not_exists'"
             )
@@ -314,7 +314,7 @@ class SandboxShellTool(SandboxToolsBase):
 
     async def _list_commands(self) -> ToolResult:
         try:
-            # 确保sandbox is initialized
+            # Ensure sandbox is initialized
             await self._ensure_sandbox()
 
             # List all tmux sessions
@@ -328,7 +328,7 @@ class SandboxShellTool(SandboxToolsBase):
                     {"message": "No active tmux sessions found.", "sessions": []}
                 )
 
-            # 解析session list
+            # Parse session list
             sessions = []
             for line in output.split("\n"):
                 if line.strip():
@@ -404,7 +404,7 @@ class SandboxShellTool(SandboxToolsBase):
         for session_name in list(self._sessions.keys()):
             await self._cleanup_session(session_name)
 
-        # 同时清理任何 tmux 会话
+        # Also clean up any tmux sessions
         try:
             await self._ensure_sandbox()
             await self._execute_raw_command("tmux kill-server 2>/dev/null || true")

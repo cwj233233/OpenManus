@@ -19,7 +19,7 @@ async def manager() -> AsyncGenerator[SandboxManager, None]:
     try:
         yield manager
     finally:
-        # 确保all resources are cleaned up
+        # Ensure all resources are cleaned up
         await manager.cleanup()
 
 
@@ -39,12 +39,12 @@ def temp_file():
 @pytest.mark.asyncio
 async def test_create_sandbox(manager):
     """Tests sandbox creation."""
-    # 创建default sandbox
+    # Create default sandbox
     sandbox_id = await manager.create_sandbox()
     assert sandbox_id in manager._sandboxes
     assert sandbox_id in manager._last_used
 
-    # 验证sandbox functionality
+    # Verify sandbox functionality
     sandbox = await manager.get_sandbox(sandbox_id)
     result = await sandbox.run_command("echo 'test'")
     assert result.strip() == "test"
@@ -55,26 +55,26 @@ async def test_max_sandboxes_limit(manager):
     """Tests maximum sandbox limit enforcement."""
     created_sandboxes = []
     try:
-        # 创建maximum number of sandboxes
+        # Create maximum number of sandboxes
         for _ in range(manager.max_sandboxes):
             sandbox_id = await manager.create_sandbox()
             created_sandboxes.append(sandbox_id)
 
-        # 验证created sandbox count
+        # Verify created sandbox count
         assert len(manager._sandboxes) == manager.max_sandboxes
 
-        # 尝试创建额外的沙箱应该失败
+        # Attempting to create additional sandbox should fail
         with pytest.raises(RuntimeError) as exc_info:
             await manager.create_sandbox()
 
-        # 验证error message
+        # Verify error message
         expected_message = (
             f"Maximum number of sandboxes ({manager.max_sandboxes}) reached"
         )
         assert str(exc_info.value) == expected_message
 
     finally:
-        # 清理所有创建的沙箱
+        # Clean up all created sandboxes
         for sandbox_id in created_sandboxes:
             try:
                 await manager.delete_sandbox(sandbox_id)
@@ -103,7 +103,7 @@ async def test_sandbox_cleanup(manager):
 @pytest.mark.asyncio
 async def test_idle_sandbox_cleanup(manager):
     """Tests automatic cleanup of idle sandboxes."""
-    # 设置short idle timeout
+    # Set short idle timeout
     manager.idle_timeout = 0.1
 
     sandbox_id = await manager.create_sandbox()
@@ -120,16 +120,16 @@ async def test_idle_sandbox_cleanup(manager):
 @pytest.mark.asyncio
 async def test_manager_cleanup(manager):
     """Tests manager cleanup functionality."""
-    # 创建multiple sandboxes
+    # Create multiple sandboxes
     sandbox_ids = []
     for _ in range(2):
         sandbox_id = await manager.create_sandbox()
         sandbox_ids.append(sandbox_id)
 
-    # 清理所有资源
+    # Clean up all resources
     await manager.cleanup()
 
-    # 验证all sandboxes have been cleaned up
+    # Verify all sandboxes have been cleaned up
     assert not manager._sandboxes
     assert not manager._last_used
 

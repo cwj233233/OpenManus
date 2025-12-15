@@ -58,7 +58,7 @@ class CreateChatCompletion(BaseTool):
         origin = get_origin(type_hint)
         args = get_args(type_hint)
 
-        # 处理primitive types
+        # Handle primitive types
         if origin is None:
             return {
                 "type": "object",
@@ -71,7 +71,7 @@ class CreateChatCompletion(BaseTool):
                 "required": self.required,
             }
 
-        # 处理List type
+        # Handle List type
         if origin is list:
             item_type = args[0] if args else Any
             return {
@@ -85,7 +85,7 @@ class CreateChatCompletion(BaseTool):
                 "required": self.required,
             }
 
-        # 处理Dict type
+        # Handle Dict type
         if origin is dict:
             value_type = args[1] if len(args) > 1 else Any
             return {
@@ -99,7 +99,7 @@ class CreateChatCompletion(BaseTool):
                 "required": self.required,
             }
 
-        # 处理Union type
+        # Handle Union type
         if origin is Union:
             return self._create_union_schema(args)
 
@@ -137,7 +137,7 @@ class CreateChatCompletion(BaseTool):
         """
         required = required or self.required
 
-        # 处理case when required is a list
+        # Handle case when required is a list
         if isinstance(required, list) and len(required) > 0:
             if len(required) == 1:
                 required_field = required[0]
