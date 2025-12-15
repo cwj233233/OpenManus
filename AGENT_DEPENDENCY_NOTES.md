@@ -9,3 +9,10 @@
 ## 运行入口
 - CLI 入口位于 `main.py`：解析 `--prompt` 参数，创建并初始化 `Manus` 实例，调用 `run` 执行任务并在退出时确保 `cleanup`，是框架的默认启动方式。【F:main.py†L1-L36】【F:app/agent/manus.py†L59-L165】
 
+### 运行 `python main.py` 时会触达的关键文件
+- `main.py`：解析命令行入参后调用 `Manus.create()`，并在终止前确保 `cleanup`。【F:main.py†L1-L36】
+- `app/config.py`：`Manus` 导入时读取配置文件（`config/config.toml` 或示例），构建 LLM、浏览器、MCP 等设置并暴露全局 `config`。【F:app/config.py†L10-L217】【F:app/config.py†L219-L290】
+- `app/agent/manus.py`：定义 `Manus.create`、MCP 连接、浏览器上下文注入及工具集合，创建实例时会初始化 MCP 客户端与浏览器助手。【F:app/agent/manus.py†L5-L165】
+- `app/agent/toolcall.py` 与 `app/agent/react.py`：`Manus` 在执行 `run` 时复用工具调用/ReAct 的 `step→think/act` 流程与工具执行逻辑。【F:app/agent/toolcall.py†L7-L259】【F:app/agent/react.py†L6-L38】
+- `app/agent/base.py`：`run` 的状态机、记忆写入、步进循环与 stuck 处理来自基类；`Manus.run` 间接调用这里的实现。【F:app/agent/base.py†L7-L155】
+
